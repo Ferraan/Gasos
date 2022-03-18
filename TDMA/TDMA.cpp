@@ -1,9 +1,11 @@
 #include <iostream>
 #include <cmath>
+#include <iomanip>
 using namespace std;
+const int n = 10;
 double re(double rP, double deltaR);
 double rw(double rP, double deltaR);
-double * solver(double T[], double aP[], double aW[], double aE[], double bP[], double P[], double R[],const int n);
+void solver(double (&T)[n+3], double aP[], double aW[], double aE[], double bP[], double (&P)[n+4], double (&R)[n+4],const int n);
 
 int main()
 {
@@ -16,65 +18,78 @@ int main()
     double Text = 25;
     double alphaext = 30;
     double alphaend = 20;
-    const int n = 10;
+    
     double deltaR = (Rext - Rint) / n;
     double T[n + 3];
-    double aP[n + 2];
-    double aW[n + 2];
-    double aE[n + 2];
-    double bP[n + 2];
-    double rP[n + 2];
-    double AP[n+2];
-    double Se[n+2];
-    double Sw[n+2];
-    double P[n + 3];
-    double R[n + 3];
+    double aP[n + 3];
+    double aW[n + 3];
+    double aE[n + 3];
+    double bP[n + 3];
+    double rP[n + 3];
+    double AP[n+3];
+    double Se[n+3];
+    double Sw[n+3];
+    double P[n + 4];
+    double R[n + 4];
 
     aP[1] = 1;
-    aW[1] = 0;
-    aE[1] = 0;
     bP[1] = Twall;
     //Posicio nodes "reals"
-    rP[0] = Rint;
-    rP[1] = rP[0] + deltaR / 2;
-    for (int i = 2; i <= n; i++)
+    rP[0] = 0;
+    T[0]=0;
+    Se[0]=0;
+    rP[1] = Rint;
+    rP[2] = rP[1] + deltaR / 2;
+    for (int i = 3; i < n+2; i++)
     {
         rP[i] = rP[i - 1] + deltaR;
     }
-    rP[n + 1] = Rext;
+    rP[n + 2] = Rext;
     //Ap
     AP[0]=0;
-    for (int i = 1; i < n+1; i++)
+    AP[1]=0;
+    for (int i = 2; i < n+2; i++)
     {
         AP[i]=2*pi*(pow(re(rP[i],deltaR),2)-pow(rw(rP[i],deltaR),2));
     }
-    AP[n+1]=0;
+    AP[n+2]=0;
     
     Sw[0]=0;
-    Se[n+1]=0;
-    for (int i = 1; i < n+2; i++)
+    Sw[1]=0;
+    Se[n+2]=0;
+    for (int i = 1; i < n+3; i++)
     {
-        Sw[i]=2*pi*(rP[i]-deltaR/2)*ef;
-        Se[i]=2*pi*(rP[i]+deltaR/2)*ef;
+        Sw[i]=2*pi*(rP[i]-(rP[i]-rP[i-1])/2)*ef;
+        Se[i]=2*pi*(rP[i]+(rP[i+1]-rP[i])/2)*ef;
     }
     aW[0]=0;
     aE[0]=0;
-    bP[0]=Twall;
-    aP[0]=1;
-    for (int i = 1; i < n+1; i++)
+    bP[0]=0;
+    aP[0]=0;
+    aW[1]=0;
+    aE[1]=0;
+    bP[1]=Twall;
+    aP[1]=1;
+    for (int i = 2; i < n+2; i++)
     {
-        aW[i]=(lambda*Sw[i])/(deltaR);
-        aE[i]=(lambda*Se[i])/(deltaR);
+        aW[i]=(lambda*Sw[i])/(abs(rP[i-1]-rP[i]));
+        aE[i]=(lambda*Se[i])/(rP[i]-rP[i-1]);
         aP[i]=aE[i]+aW[i]+alphaext*AP[i];
         bP[i]=alphaext*Text*AP[i];
     }
-    aE[n+1]=0;
-    aW[n+1]=lambda/deltaR;
-    aP[n+1]=aW[n+1]+alphaend;
-    bP[n+1]=alphaend*Text;
-    double *as;
+    aE[n+2]=0;
+    aW[n+2]=(lambda)/(rP[n+2]-rP[n+1]);
+    aP[n+2]=aW[n+2]+alphaend;
+    bP[n+2]=alphaend*Text;
 
-    as = solver(T,aP,aW,aE,bP,P,R,n);
+    solver(T,aP,aW,aE,bP,P,R,n);
+    cout<<"i"<<setw(17)<<"rP[i]"<<setw(17)<<"T[i]"<<setw(17)<<"Se[i]"<<setw(17)<<"Sw[i]"<<setw(17)<<"aE[i]"<<setw(17)<<"aW[i]"<<setw(17)<<"aP[i]"<<setw(17)<<"bP[i]"<<setw(17)<<"P[i]"<<setw(17)<<"R[i]"<<endl;
+    for (int i = 0; i < n+3; i++)
+    {   
+        cout<<setw(17)<<left<<i<<setw(17)<<left<<rP[i]<<setw(17)<<left<<T[i]<<setw(17)<<left<<Se[i]<<setw(17)<<left<<Sw[i]<<setw(17)<<left<<aE[i]<<setw(17)<<left<<aW[i]<<setw(17)<<left<<aP[i]<<setw(17)<<left<<bP[i]<<setw(17)<<left<<P[i]<<setw(17)<<left<<R[i]<<endl;
+        
+    }
+    
 }
 
 
@@ -84,18 +99,18 @@ double re(double rP, double deltaR){
 double rw(double rP, double deltaR){
     return(rP-deltaR/2);
 }
-double * solver(double T[], double aP[], double aW[], double aE[], double bP[], double P[], double R[],const int n){
+void solver(double (&T)[n+3], double aP[], double aW[], double aE[], double bP[], double (&P)[n+4], double (&R)[n+4],const int n){
     P[0]=0;
     R[0]=0;
-    for (int i = 1; i < n+2; i++)
+    for (int i = 1; i < n+3; i++)
     {
         P[i]=aE[i]/(aP[i]-aW[i]*P[i-1]);
         R[i]=(bP[i]+aW[i]*R[i-1])/(aP[i]-aW[i]*P[i-1]);
     }
-    for (int i = n+1; i > 0; i--)
+    for (int i = n+2; i >= 1; i--)
     {
         T[i]=P[i]*T[i+1]+R[i];
     }
-    return(T);
+    
     
 }
