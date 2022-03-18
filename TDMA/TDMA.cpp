@@ -3,6 +3,8 @@
 using namespace std;
 double re(double rP, double deltaR);
 double rw(double rP, double deltaR);
+double * solver(double T[], double aP[], double aW[], double aE[], double bP[], double P[], double R[],const int n);
+
 int main()
 {
     double pi = 2 * acos(0.0);
@@ -16,7 +18,7 @@ int main()
     double alphaend = 20;
     const int n = 10;
     double deltaR = (Rext - Rint) / n;
-    double T[n + 4];
+    double T[n + 3];
     double aP[n + 2];
     double aW[n + 2];
     double aE[n + 2];
@@ -25,8 +27,9 @@ int main()
     double AP[n+2];
     double Se[n+2];
     double Sw[n+2];
-    double P[n + 4];
-    double R[n + 4];
+    double P[n + 3];
+    double R[n + 3];
+
     aP[1] = 1;
     aW[1] = 0;
     aE[1] = 0;
@@ -69,7 +72,9 @@ int main()
     aW[n+1]=lambda/deltaR;
     aP[n+1]=aW[n+1]+alphaend;
     bP[n+1]=alphaend*Text;
+    double *as;
 
+    as = solver(T,aP,aW,aE,bP,P,R,n);
 }
 
 
@@ -78,4 +83,19 @@ double re(double rP, double deltaR){
 }
 double rw(double rP, double deltaR){
     return(rP-deltaR/2);
+}
+double * solver(double T[], double aP[], double aW[], double aE[], double bP[], double P[], double R[],const int n){
+    P[0]=0;
+    R[0]=0;
+    for (int i = 1; i < n+2; i++)
+    {
+        P[i]=aE[i]/(aP[i]-aW[i]*P[i-1]);
+        R[i]=(bP[i]+aW[i]*R[i-1])/(aP[i]-aW[i]*P[i-1]);
+    }
+    for (int i = n+1; i > 0; i--)
+    {
+        T[i]=P[i]*T[i+1]+R[i];
+    }
+    return(T);
+    
 }
