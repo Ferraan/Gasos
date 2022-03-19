@@ -1,8 +1,12 @@
 #include <iostream>
 #include <cmath>
 #include <iomanip>
+#include <chrono>
 using namespace std;
-const int n = 1000;
+
+auto start = chrono::high_resolution_clock::now();
+
+const int n = 100;
 double re(double rP, double deltaR);
 double rw(double rP, double deltaR);
 void solverGS(double (&T)[n+3],double (&T_old)[n+3],double (&T_new)[n+3],double (&T_calc)[n+3], double aP[], double aW[], double aE[], double bP[],const int n,double delta,double fr);
@@ -87,13 +91,16 @@ int main()
     bP[n+2]=alphaend*Text;
 
     solverGS(T,T_old,T_new,T_calc,aP,aW,aE,bP,n,delta,fr);
+    auto stop = chrono::high_resolution_clock::now();
+    auto duration = chrono::duration_cast<chrono::microseconds>(stop - start);
+
     cout<<"i"<<setw(17)<<"rP[i]"<<setw(17)<<"T[i]"<<setw(17)<<"Se[i]"<<setw(17)<<"Sw[i]"<<setw(17)<<"aE[i]"<<setw(17)<<"aW[i]"<<setw(17)<<"aP[i]"<<setw(17)<<"bP[i]"<<endl;
     for (int i = 0; i < n+3; i++)
     {   
         cout<<setw(17)<<left<<i<<setw(17)<<left<<rP[i]<<setw(17)<<left<<T[i]<<setw(17)<<left<<Se[i]<<setw(17)<<left<<Sw[i]<<setw(17)<<left<<aE[i]<<setw(17)<<left<<aW[i]<<setw(17)<<left<<aP[i]<<setw(17)<<left<<bP[i]<<endl;
         
     }
-    
+    cout<<"Temps execucio (s)" <<static_cast<float>(duration.count())/1000000 << endl;
 }
 
 
