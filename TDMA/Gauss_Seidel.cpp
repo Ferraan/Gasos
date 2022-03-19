@@ -2,7 +2,7 @@
 #include <cmath>
 #include <iomanip>
 using namespace std;
-const int n = 10;
+const int n = 100;
 double re(double rP, double deltaR);
 double rw(double rP, double deltaR);
 void solverGS(double (&T)[n+3],double (&T_old)[n+3],double (&T_new)[n+3],double (&T_calc)[n+3], double aP[], double aW[], double aE[], double bP[],const int n,double delta,double fr);
@@ -107,15 +107,19 @@ void solverGS(double (&T)[n+3],double (&T_old)[n+3],double (&T_new)[n+3],double 
     float dif=0.5;
     while (dif>delta)
     {   
-        for (int i = 0; i < n+3; i++)
-        {
+        dif=0;
+        for (int i = 1; i < n+3; i++)
+        {            
+            T_calc[i]=(aE[i]*T_new[i+1]+aW[i]*T_new[i-1]+bP[i])/aP[i];
+            
+        }
+        for (int i = 1; i < n+3; i++){
             T_new[i]=T_old[i]+fr*(T_calc[i]-T_old[i]);
             if(T_old[i]-T_new[i]>dif){
-                dif=T_old[i]-T_new[i];
+                dif=abs(T_old[i]-T_new[i]);
             }
-            copy(begin(T_new),end(T_new),begin(T_old));//Told=Tnew
-            T_calc[i]=(aE[i]*T_new[i+1]+aW[i]*T_new[i-1]+bP[i])/aP[i];
         }
+        copy(begin(T_new),end(T_new),begin(T_old));//Told=Tnew
     }   
     copy(begin(T_calc),end(T_calc),begin(T));
 }
