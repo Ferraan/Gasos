@@ -2,7 +2,7 @@
 #include <cmath>
 #include <iomanip>
 using namespace std;
-const int n = 100;
+const int n = 1000;
 double re(double rP, double deltaR);
 double rw(double rP, double deltaR);
 void solverGS(double (&T)[n+3],double (&T_old)[n+3],double (&T_new)[n+3],double (&T_calc)[n+3], double aP[], double aW[], double aE[], double bP[],const int n,double delta,double fr);
@@ -18,7 +18,7 @@ int main()
     double Text = 25;
     double alphaext = 30;
     double alphaend = 20;
-    double delta = 1e-8;
+    double delta = 1e-10;
     double deltaR = (Rext - Rint) / n;
     double T[n + 3];
     double T_new[n + 3];

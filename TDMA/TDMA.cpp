@@ -2,7 +2,7 @@
 #include <cmath>
 #include <iomanip>
 using namespace std;
-const int n = 10;
+const int n = 1000;
 double re(double rP, double deltaR);
 double rw(double rP, double deltaR);
 void solver(double (&T)[n+3], double aP[], double aW[], double aE[], double bP[], double (&P)[n+4], double (&R)[n+4],const int n);
