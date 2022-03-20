@@ -2,6 +2,7 @@
 #include <cmath>
 #include <iomanip>
 #include <chrono>
+#include <fstream>
 using namespace std;
 auto start = chrono::high_resolution_clock::now();
 const int n = 10000;
@@ -87,10 +88,12 @@ int main()
     solver(T,aP,aW,aE,bP,P,R,n);
     auto stop = chrono::high_resolution_clock::now();
     auto duration = chrono::duration_cast<chrono::microseconds>(stop - start);
-    cout<<"i"<<setw(17)<<"rP[i]"<<setw(17)<<"T[i]"<<setw(17)<<"Se[i]"<<setw(17)<<"Sw[i]"<<setw(17)<<"aE[i]"<<setw(17)<<"aW[i]"<<setw(17)<<"aP[i]"<<setw(17)<<"bP[i]"<<setw(17)<<"P[i]"<<setw(17)<<"R[i]"<<endl;
+    ofstream fout;
+    fout.open("Resultats.csv");
+    fout<<"i"<<","<<"rP[i]"<<","<<"T[i]"<<","<<"Se[i]"<<","<<"Sw[i]"<<","<<"aE[i]"<<","<<"aW[i]"<<","<<"aP[i]"<<","<<"bP[i]"<<","<<"P[i]"<<","<<"R[i]"<<endl;
     for (int i = 0; i < n+3; i++)
     {   
-        cout<<setw(17)<<left<<i<<setw(17)<<left<<rP[i]<<setw(17)<<left<<T[i]<<setw(17)<<left<<Se[i]<<setw(17)<<left<<Sw[i]<<setw(17)<<left<<aE[i]<<setw(17)<<left<<aW[i]<<setw(17)<<left<<aP[i]<<setw(17)<<left<<bP[i]<<setw(17)<<left<<P[i]<<setw(17)<<left<<R[i]<<endl;
+        fout<<i<<","<<rP[i]<<","<<T[i]<<","<<Se[i]<<","<<Sw[i]<<","<<aE[i]<<","<<aW[i]<<","<<aP[i]<<","<<bP[i]<<","<<P[i]<<","<<R[i]<<endl;
         
     }
     cout<<"Temps execucio (s)" <<static_cast<float>(duration.count())/1000000 << endl;

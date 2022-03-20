@@ -1,6 +1,7 @@
 #include <iostream>
 #include <cmath>
 #include <iomanip>
+#include <fstream>
 #include <chrono>
 using namespace std;
 
@@ -94,10 +95,13 @@ int main()
     auto stop = chrono::high_resolution_clock::now();
     auto duration = chrono::duration_cast<chrono::microseconds>(stop - start);
 
-    cout<<"i"<<setw(17)<<"rP[i]"<<setw(17)<<"T[i]"<<setw(17)<<"Se[i]"<<setw(17)<<"Sw[i]"<<setw(17)<<"aE[i]"<<setw(17)<<"aW[i]"<<setw(17)<<"aP[i]"<<setw(17)<<"bP[i]"<<endl;
+    ofstream fout;
+    fout.open("Resultats_GS.csv");
+    fout<<"i"<<","<<"rP[i]"<<","<<"T[i]"<<","<<"Se[i]"<<","<<"Sw[i]"<<","<<"aE[i]"<<","<<"aW[i]"<<","<<"aP[i]"<<","<<"bP[i]"<<endl;
     for (int i = 0; i < n+3; i++)
     {   
-        cout<<setw(17)<<left<<i<<setw(17)<<left<<rP[i]<<setw(17)<<left<<T[i]<<setw(17)<<left<<Se[i]<<setw(17)<<left<<Sw[i]<<setw(17)<<left<<aE[i]<<setw(17)<<left<<aW[i]<<setw(17)<<left<<aP[i]<<setw(17)<<left<<bP[i]<<endl;
+        fout<<i<<","<<rP[i]<<","<<T[i]<<","<<Se[i]<<","<<Sw[i]<<","<<aE[i]<<","<<aW[i]<<","<<aP[i]<<","<<bP[i]<<endl;
+        
         
     }
     cout<<"Temps execucio (s)" <<static_cast<float>(duration.count())/1000000 << endl;
