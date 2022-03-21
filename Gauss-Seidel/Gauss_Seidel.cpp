@@ -133,4 +133,4 @@ void solverGS(double (&T)[n+3],double (&T_old)[n+3],double (&T_new)[n+3],double 
         copy(begin(T_new),end(T_new),begin(T_old));//Told=Tnew
     }   
     copy(begin(T_calc),end(T_calc),begin(T));
-}c 
+}
