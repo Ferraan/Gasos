@@ -6,7 +6,7 @@
 #include <fstream>
 using namespace std;
 auto start = chrono::high_resolution_clock::now();
-const int n = 10000;
+const int n = 100;
 double re(double rP, double deltaR);
 double rw(double rP, double deltaR);
 void solver(vector<double>& T, double aP[], double aW[], double aE[], double bP[], double (&P)[n+4], double (&R)[n+4],const int n);
