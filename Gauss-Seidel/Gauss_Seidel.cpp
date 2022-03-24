@@ -1,6 +1,7 @@
 #include <iostream>
 #include <cmath>
 #include <iomanip>
+#include <vector>
 #include <fstream>
 #include <chrono>
 using namespace std;
@@ -10,7 +11,7 @@ auto start = chrono::high_resolution_clock::now();
 const int n = 100;
 double re(double rP, double deltaR);
 double rw(double rP, double deltaR);
-void solverGS(double (&T)[n+3],double (&T_old)[n+3],double (&T_new)[n+3],double (&T_calc)[n+3], double aP[], double aW[], double aE[], double bP[],const int n,double delta,double fr);
+void solverGS(vector<double>& T,vector<double> aP,vector<double> aW, vector<double> aE, vector<double> bP,const int n,double delta,double fr);
 
 int main()
 {
@@ -25,22 +26,21 @@ int main()
     double alphaend = 20;
     double delta = 1e-10;
     double deltaR = (Rext - Rint) / n;
-    double T[n + 3];
-    double T_new[n + 3];
-    double T_old[n + 3];
-    double T_calc[n + 3];
-    fill_n(T_new, n+3, 100);//T inicial
-    fill_n(T_old, n+3, 100);
-    fill_n(T, n+3, 100);
+    double T_inici =200;
     double fr=1;
-    double aP[n + 3];
-    double aW[n + 3];
-    double aE[n + 3];
-    double bP[n + 3];
-    double rP[n + 3];
-    double AP[n+3];
-    double Se[n+3];
-    double Sw[n+3];
+    vector<double> T(n + 3);
+    vector<double> aP(n + 3);
+    vector<double> aW(n + 3);
+    vector<double> aE(n + 3);
+    vector<double> bP(n + 3);
+    vector<double> rP(n + 3);
+    vector<double> AP(n +3);
+    vector<double> Se(n +3);
+    vector<double> Sw(n +3);
+    
+    
+    
+   
     aP[1] = 1;
     bP[1] = Twall;
     //Posicio nodes "reals"
@@ -91,7 +91,7 @@ int main()
     aP[n+2]=aW[n+2]+alphaend;
     bP[n+2]=alphaend*Text;
 
-    solverGS(T,T_old,T_new,T_calc,aP,aW,aE,bP,n,delta,fr);
+    solverGS(T,aP,aW,aE,bP,n,delta,fr);
     auto stop = chrono::high_resolution_clock::now();
     auto duration = chrono::duration_cast<chrono::microseconds>(stop - start);
 
@@ -114,7 +114,10 @@ double re(double rP, double deltaR){
 double rw(double rP, double deltaR){
     return(rP-deltaR/2);
 }
-void solverGS(double (&T)[n+3],double (&T_old)[n+3],double (&T_new)[n+3],double (&T_calc)[n+3], double aP[], double aW[], double aE[], double bP[],const int n,double delta,double fr){
+void solverGS(vector<double>& T,vector<double> aP,vector<double> aW, vector<double> aE, vector<double> bP,const int n, double delta,double fr){
+    vector<double> T_old(n+3,200);
+    vector<double> T_calc(n+3);
+    vector<double> T_new(n+3,200);
     float dif=0.5;
     while (dif>delta)
     {   

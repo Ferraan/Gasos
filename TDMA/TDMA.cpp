@@ -6,7 +6,7 @@
 #include <fstream>
 using namespace std;
 auto start = chrono::high_resolution_clock::now();
-const int n = 20000000;
+const int n = 100;
 double re(double rP, double deltaR);
 double rw(double rP, double deltaR);
 void solver(vector<double>& T,vector<double> aP,vector<double> aW, vector<double> aE, vector<double> bP, vector<double>& P, vector<double>& R,const int n);
@@ -90,14 +90,14 @@ int main()
     auto stop = chrono::high_resolution_clock::now();
     auto duration = chrono::duration_cast<chrono::microseconds>(stop - start);
     cout<<"Temps execucio (s)" <<static_cast<float>(duration.count())/1000000 << endl;
-    /* ofstream fout;
+    ofstream fout;
     fout.open("Resultats.csv");
     fout<<"i"<<","<<"rP[i]"<<","<<"T[i]"<<","<<"Se[i]"<<","<<"Sw[i]"<<","<<"aE[i]"<<","<<"aW[i]"<<","<<"aP[i]"<<","<<"bP[i]"<<","<<"P[i]"<<","<<"R[i]"<<endl;
     for (int i = 0; i < n+3; i++)
     {   
         fout<<i<<","<<rP[i]<<","<<T[i]<<","<<Se[i]<<","<<Sw[i]<<","<<aE[i]<<","<<aW[i]<<","<<aP[i]<<","<<bP[i]<<","<<P[i]<<","<<R[i]<<endl;
         
-    } */
+    }
     
 }
 
