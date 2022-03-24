@@ -1,6 +1,7 @@
 #include <iostream>
 #include <cmath>
 #include <iomanip>
+#include <vector>
 #include <chrono>
 #include <fstream>
 using namespace std;
@@ -8,7 +9,7 @@ auto start = chrono::high_resolution_clock::now();
 const int n = 10000;
 double re(double rP, double deltaR);
 double rw(double rP, double deltaR);
-void solver(double (&T)[n+3], double aP[], double aW[], double aE[], double bP[], double (&P)[n+4], double (&R)[n+4],const int n);
+void solver(vector<double>& T, double aP[], double aW[], double aE[], double bP[], double (&P)[n+4], double (&R)[n+4],const int n);
 
 int main()
 {
@@ -23,7 +24,7 @@ int main()
     double alphaend = 20;
     
     double deltaR = (Rext - Rint) / n;
-    double T[n + 3];
+    vector<double> T(n + 3);
     double aP[n + 3];
     double aW[n + 3];
     double aE[n + 3];
@@ -106,7 +107,7 @@ double re(double rP, double deltaR){
 double rw(double rP, double deltaR){
     return(rP-deltaR/2);
 }
-void solver(double (&T)[n+3], double aP[], double aW[], double aE[], double bP[], double (&P)[n+4], double (&R)[n+4],const int n){
+void solver(vector<double>& T, double aP[], double aW[], double aE[], double bP[], double (&P)[n+4], double (&R)[n+4],const int n){
     P[0]=0;
     R[0]=0;
     for (int i = 1; i < n+3; i++)
