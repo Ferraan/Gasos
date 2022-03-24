@@ -6,10 +6,10 @@
 #include <fstream>
 using namespace std;
 auto start = chrono::high_resolution_clock::now();
-const int n = 100;
+const int n = 1000;
 double re(double rP, double deltaR);
 double rw(double rP, double deltaR);
-void solver(vector<double>& T, double aP[], double aW[], double aE[], double bP[], double (&P)[n+4], double (&R)[n+4],const int n);
+void solver(vector<double>& T,vector<double> aP,vector<double> aW, vector<double> aE, vector<double> bP, vector<double>& P, vector<double>& R,const int n);
 
 int main()
 {
@@ -25,16 +25,16 @@ int main()
     
     double deltaR = (Rext - Rint) / n;
     vector<double> T(n + 3);
-    double aP[n + 3];
-    double aW[n + 3];
-    double aE[n + 3];
-    double bP[n + 3];
-    double rP[n + 3];
-    double AP[n+3];
-    double Se[n+3];
-    double Sw[n+3];
-    double P[n + 4];
-    double R[n + 4];
+    vector<double> aP(n + 3);
+    vector<double> aW(n + 3);
+    vector<double> aE(n + 3);
+    vector<double> bP(n + 3);
+    vector<double> rP(n + 3);
+    vector<double> AP(n +3);
+    vector<double> Se(n +3);
+    vector<double> Sw(n +3);
+    vector<double> P(n + 4);
+    vector<double> R(n + 4);
 
     aP[1] = 1;
     bP[1] = Twall;
@@ -107,7 +107,7 @@ double re(double rP, double deltaR){
 double rw(double rP, double deltaR){
     return(rP-deltaR/2);
 }
-void solver(vector<double>& T, double aP[], double aW[], double aE[], double bP[], double (&P)[n+4], double (&R)[n+4],const int n){
+void solver(vector<double>& T,vector<double> aP,vector<double> aW, vector<double> aE, vector<double> bP, vector<double>& P, vector<double>& R,const int n){
     P[0]=0;
     R[0]=0;
     for (int i = 1; i < n+3; i++)
