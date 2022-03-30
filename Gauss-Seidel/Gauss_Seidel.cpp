@@ -8,14 +8,16 @@ using namespace std;
 
 auto start = chrono::high_resolution_clock::now();
 
-const int n = 500;
+const int n = 6000;
+const double delta = 1e-7;
+const double pi = 2 * acos(0.0);
 double re(double rP, double deltaR);
 double rw(double rP, double deltaR);
 void solverGS(vector<double>& T,vector<double> aP,vector<double> aW, vector<double> aE, vector<double> bP,const int n,double delta,double fr);
 
 int main()
 {
-    double pi = 2 * acos(0.0);
+    
     double Rint = 2;
     double Rext = 10;
     double ef = 0.5;
@@ -24,10 +26,10 @@ int main()
     double Text = 25;
     double alphaext = 30;
     double alphaend = 20;
-    double delta = 1e-7;
+    
     double deltaR = (Rext - Rint) / n;
     double T_inici =200;
-    double fr=1.8;
+    double fr=1.9;
     vector<double> T(n + 3);
     for (int i = 1; i < n+3; i++)
     {
