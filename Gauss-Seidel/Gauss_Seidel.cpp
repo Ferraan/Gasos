@@ -8,7 +8,7 @@ using namespace std;
 
 auto start = chrono::high_resolution_clock::now();
 
-const int n = 5000;
+const int n = 500;
 double re(double rP, double deltaR);
 double rw(double rP, double deltaR);
 void solverGS(vector<double>& T,vector<double> aP,vector<double> aW, vector<double> aE, vector<double> bP,const int n,double delta,double fr);
@@ -27,7 +27,7 @@ int main()
     double delta = 1e-7;
     double deltaR = (Rext - Rint) / n;
     double T_inici =200;
-    double fr=1.5;
+    double fr=1.8;
     vector<double> T(n + 3);
     for (int i = 1; i < n+3; i++)
     {
@@ -99,7 +99,7 @@ int main()
     solverGS(T,aP,aW,aE,bP,n,delta,fr);
     auto stop = chrono::high_resolution_clock::now();
     auto duration = chrono::duration_cast<chrono::microseconds>(stop - start);
-
+    cout<<"Temps execucio (s)" <<static_cast<float>(duration.count())/1000000 << endl;
     ofstream fout;
     fout.open("Resultats_GS.csv");
     fout<<"i"<<","<<"rP[i]"<<","<<"T[i]"<<","<<"Se[i]"<<","<<"Sw[i]"<<","<<"aE[i]"<<","<<"aW[i]"<<","<<"aP[i]"<<","<<"bP[i]"<<endl;
@@ -109,7 +109,7 @@ int main()
         
         
     } 
-    cout<<"Temps execucio (s)" <<static_cast<float>(duration.count())/1000000 << endl;
+    
 }
 
 
