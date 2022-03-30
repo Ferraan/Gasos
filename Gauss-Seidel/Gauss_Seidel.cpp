@@ -8,7 +8,7 @@ using namespace std;
 
 auto start = chrono::high_resolution_clock::now();
 
-const int n = 1000;
+const int n = 5000;
 double re(double rP, double deltaR);
 double rw(double rP, double deltaR);
 void solverGS(vector<double>& T,vector<double> aP,vector<double> aW, vector<double> aE, vector<double> bP,const int n,double delta,double fr);
@@ -28,7 +28,12 @@ int main()
     double deltaR = (Rext - Rint) / n;
     double T_inici =200;
     double fr=1.5;
-    vector<double> T(n + 3,T_inici);
+    vector<double> T(n + 3);
+    for (int i = 1; i < n+3; i++)
+    {
+        T[i]=(Twall-Text)-
+    }
+    
     vector<double> aP(n + 3);
     vector<double> aW(n + 3);
     vector<double> aE(n + 3);
@@ -117,11 +122,11 @@ double rw(double rP, double deltaR){
 void solverGS(vector<double>& T,vector<double> aP,vector<double> aW, vector<double> aE, vector<double> bP,const int n, double delta,double fr){
     float dif=0.5;
     double Told;
-    T[1]=(aE[1]*T[1+1]+aW[1]*T[1-1]+bP[1])/aP[1];
+    
     while (dif>delta)
     {   
         dif=0;
-        for (int i = 2; i < n+3; i++)
+        for (int i = 1; i < n+3; i++)
         {
             Told=T[i];
             T[i]=(aE[i]*T[i+1]+aW[i]*T[i-1]+bP[i])/aP[i];
