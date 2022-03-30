@@ -8,7 +8,7 @@ using namespace std;
 
 auto start = chrono::high_resolution_clock::now();
 
-const int n = 10000;
+const int n = 1000;
 double re(double rP, double deltaR);
 double rw(double rP, double deltaR);
 void solverGS(vector<double>& T,vector<double> aP,vector<double> aW, vector<double> aE, vector<double> bP,const int n,double delta,double fr);
@@ -27,8 +27,8 @@ int main()
     double delta = 1e-7;
     double deltaR = (Rext - Rint) / n;
     double T_inici =200;
-    double fr=1;
-    vector<double> T(n + 3);
+    double fr=1.5;
+    vector<double> T(n + 3,T_inici);
     vector<double> aP(n + 3);
     vector<double> aW(n + 3);
     vector<double> aE(n + 3);
@@ -95,7 +95,7 @@ int main()
     auto stop = chrono::high_resolution_clock::now();
     auto duration = chrono::duration_cast<chrono::microseconds>(stop - start);
 
-    /* ofstream fout;
+    ofstream fout;
     fout.open("Resultats_GS.csv");
     fout<<"i"<<","<<"rP[i]"<<","<<"T[i]"<<","<<"Se[i]"<<","<<"Sw[i]"<<","<<"aE[i]"<<","<<"aW[i]"<<","<<"aP[i]"<<","<<"bP[i]"<<endl;
     for (int i = 0; i < n+3; i++)
@@ -103,7 +103,7 @@ int main()
         fout<<i<<","<<rP[i]<<","<<T[i]<<","<<Se[i]<<","<<Sw[i]<<","<<aE[i]<<","<<aW[i]<<","<<aP[i]<<","<<bP[i]<<endl;
         
         
-    } */
+    } 
     cout<<"Temps execucio (s)" <<static_cast<float>(duration.count())/1000000 << endl;
 }
 
@@ -115,25 +115,22 @@ double rw(double rP, double deltaR){
     return(rP-deltaR/2);
 }
 void solverGS(vector<double>& T,vector<double> aP,vector<double> aW, vector<double> aE, vector<double> bP,const int n, double delta,double fr){
-    vector<double> T_old(n+3,200);
-    vector<double> T_calc(n+3);
-    vector<double> T_new(n+3,200);
     float dif=0.5;
+    double Told;
+    T[1]=(aE[1]*T[1+1]+aW[1]*T[1-1]+bP[1])/aP[1];
     while (dif>delta)
     {   
         dif=0;
-        for (int i = 1; i < n+3; i++)
-        {            
-            T_calc[i]=(aE[i]*T_new[i+1]+aW[i]*T_new[i-1]+bP[i])/aP[i];
-            
-        }
-        for (int i = 1; i < n+3; i++){
-            T_new[i]=T_old[i]+fr*(T_calc[i]-T_old[i]);
-            if(T_old[i]-T_new[i]>dif){
-                dif=abs(T_old[i]-T_new[i]);
+        for (int i = 2; i < n+3; i++)
+        {
+            Told=T[i];
+            T[i]=(aE[i]*T[i+1]+aW[i]*T[i-1]+bP[i])/aP[i];
+            if (abs(Told-T[i])>dif)
+            {
+                dif=abs(Told-T[i]);
             }
-        }
-        copy(begin(T_new),end(T_new),begin(T_old));//Told=Tnew
-    }   
-    copy(begin(T_calc),end(T_calc),begin(T));
+            T[i]=Told+fr*(T[i]-Told);
+        }    
+        
+    }  
 }
