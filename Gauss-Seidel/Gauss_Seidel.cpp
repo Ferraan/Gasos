@@ -31,7 +31,7 @@ int main()
     vector<double> T(n + 3);
     for (int i = 1; i < n+3; i++)
     {
-        T[i]=(Twall-Text)-
+        T[i]=(Twall-Text)
     }
     
     vector<double> aP(n + 3);
