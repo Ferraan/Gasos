@@ -13,7 +13,7 @@ TDMA/Gauss_Seidel.exe
 TDMA/Gauss_Seidel.obj
 TDMA/Gauss_Seidel.ilk
 TDMA/Gauss_Seidel.pdb
-Gauss-Seidel/Gauss_Seidel.exe
+
 Gauss-Seidel/Gauss_Seidel.ilk
 Gauss-Seidel/Gauss_Seidel.obj
 Gauss-Seidel/Gauss_Seidel.pdb
@@ -21,3 +21,7 @@ Gauss-Seidel/vc140.pdb
 TDMA/a.out
 TDMA/TDMA
 TDMA/Resultats.csv
+*.exe
+*.ilk
+*.obj
+*.pdb
