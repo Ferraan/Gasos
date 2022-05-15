@@ -8,7 +8,7 @@ using namespace std;
 
 auto start = chrono::high_resolution_clock::now();
 
-const int n = 6000;
+const int n = 1000;
 const double delta = 1e-7;
 const double pi = 2 * acos(0.0);
 double re(double rP, double deltaR);
