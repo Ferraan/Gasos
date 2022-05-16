@@ -2,5 +2,5 @@
 #include "enllac.h"
 
 int main(){
-    prova();
+    prova(5,3);
 }

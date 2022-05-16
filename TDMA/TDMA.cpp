@@ -4,12 +4,13 @@
 #include <vector>
 #include <chrono>
 #include <fstream>
+#include "/home/ferran/Documents/Gasos/Gasos/Solvers/solvers.h"
 using namespace std;
 auto start = chrono::high_resolution_clock::now();
-const int n = 6000;
+const int n = 100000;
 double re(double rP, double deltaR);
 double rw(double rP, double deltaR);
-void solver(vector<double>& T,vector<double> aP,vector<double> aW, vector<double> aE, vector<double> bP, vector<double>& P, vector<double>& R,const int n);
+
 
 int main()
 {
@@ -33,8 +34,7 @@ int main()
     vector<double> AP(n +3);
     vector<double> Se(n +3);
     vector<double> Sw(n +3);
-    vector<double> P(n + 4);
-    vector<double> R(n + 4);
+    
 
     aP[1] = 1;
     bP[1] = Twall;
@@ -86,7 +86,7 @@ int main()
     aP[n+2]=aW[n+2]+alphaend;
     bP[n+2]=alphaend*Text;
 
-    solver(T,aP,aW,aE,bP,P,R,n);
+    solverTDMA(T,aP,aW,aE,bP,n);
     auto stop = chrono::high_resolution_clock::now();
     auto duration = chrono::duration_cast<chrono::microseconds>(stop - start);
     cout<<"Temps execucio (s)" <<static_cast<float>(duration.count())/1000000 << endl;
@@ -95,7 +95,7 @@ int main()
     fout<<"i"<<","<<"rP[i]"<<","<<"T[i]"<<","<<"Se[i]"<<","<<"Sw[i]"<<","<<"aE[i]"<<","<<"aW[i]"<<","<<"aP[i]"<<","<<"bP[i]"<<","<<"P[i]"<<","<<"R[i]"<<endl;
     for (int i = 0; i < n+3; i++)
     {   
-        fout<<i<<","<<rP[i]<<","<<T[i]<<","<<Se[i]<<","<<Sw[i]<<","<<aE[i]<<","<<aW[i]<<","<<aP[i]<<","<<bP[i]<<","<<P[i]<<","<<R[i]<<endl;
+        fout<<i<<","<<rP[i]<<","<<T[i]<<","<<Se[i]<<","<<Sw[i]<<","<<aE[i]<<","<<aW[i]<<","<<aP[i]<<","<<bP[i]<<endl;
         
     }
     
@@ -107,19 +107,4 @@ double re(double rP, double deltaR){
 }
 double rw(double rP, double deltaR){
     return(rP-deltaR/2);
-}
-void solver(vector<double>& T,vector<double> aP,vector<double> aW, vector<double> aE, vector<double> bP, vector<double>& P, vector<double>& R,const int n){
-    P[0]=0;
-    R[0]=0;
-    for (int i = 1; i < n+3; i++)
-    {
-        P[i]=aE[i]/(aP[i]-aW[i]*P[i-1]);
-        R[i]=(bP[i]+aW[i]*R[i-1])/(aP[i]-aW[i]*P[i-1]);
-    }
-    for (int i = n+2; i >= 1; i--)
-    {
-        T[i]=P[i]*T[i+1]+R[i];
-    }
-    
-    
 }

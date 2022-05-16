@@ -4,16 +4,16 @@
 #include <vector>
 #include <fstream>
 #include <chrono>
+#include "/home/ferran/Documents/Gasos/Gasos/Solvers/solvers.h"
 using namespace std;
 
 auto start = chrono::high_resolution_clock::now();
 
 const int n = 1000;
-const double delta = 1e-7;
+const double delta = 1e-14;
 const double pi = 2 * acos(0.0);
 double re(double rP, double deltaR);
 double rw(double rP, double deltaR);
-void solverGS(vector<double>& T,vector<double> aP,vector<double> aW, vector<double> aE, vector<double> bP,const int n,double delta,double fr);
 
 int main()
 {
@@ -120,24 +120,4 @@ double re(double rP, double deltaR){
 }
 double rw(double rP, double deltaR){
     return(rP-deltaR/2);
-}
-void solverGS(vector<double>& T,vector<double> aP,vector<double> aW, vector<double> aE, vector<double> bP,const int n, double delta,double fr){
-    float dif=0.5;
-    double Told;
-    
-    while (dif>delta)
-    {   
-        dif=0;
-        for (int i = 1; i < n+3; i++)
-        {
-            Told=T[i];
-            T[i]=(aE[i]*T[i+1]+aW[i]*T[i-1]+bP[i])/aP[i];
-            if (abs(Told-T[i])>dif)
-            {
-                dif=abs(Told-T[i]);
-            }
-            T[i]=Told+fr*(T[i]-Told);
-        }    
-        
-    }  
 }

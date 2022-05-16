@@ -1,6 +1,6 @@
 #include "enllac.h"
 #include <iostream>
-int prova(){
-    std::cout<<"Funcisdfgsdfgsdfgfdona"<<std::endl;
+int prova(int a, int b){
+    std::cout<<"Funcisdfgsdfgsdfgfdona  "<<a+b<<std::endl;
     return(2341234);
 }

@@ -1,3 +1,3 @@
 #include <iostream>
 
-int prova();
+int prova(int a, int b);
