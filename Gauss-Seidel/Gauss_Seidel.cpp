@@ -1,10 +1,9 @@
 #include <iostream>
 #include <cmath>
-#include <iomanip>
 #include <vector>
 #include <fstream>
 #include <chrono>
-#include "/home/ferran/Documents/Gasos/Gasos/Solvers/solvers.h"
+#include "../Solvers/solvers.h"
 using namespace std;
 
 auto start = chrono::high_resolution_clock::now();
