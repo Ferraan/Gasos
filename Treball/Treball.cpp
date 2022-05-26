@@ -1,6 +1,7 @@
 #include <math.h>
 #include <vector>
 #include <iostream>
+#include <fstream>
 #include <iomanip>
 using namespace std;
 class fluid
@@ -17,7 +18,7 @@ class fluid
 
 
 
-const int n = 10;
+const int n = 5; //Volums de control del fluid, n+1 nodes
 const double delta = 1e-10;
 const double pi = 2 * acos(0.0);
 const double Runiversal=8.3144621;
@@ -34,7 +35,7 @@ int main(){
     
     //Calculs previs
     double Deltax=L/n;
-    double S1=pi*Di*Di/4, S3=pi*pow(Dm-Do,2)/4, Sl1=pi*Di*Deltax;
+    double S1=pi*Di*Di/4, S3=pi*pow(Dm-Do,2)/4, Sl2int=pi*Di*Deltax;
     cout<<S1<<endl;
     double molsH2=cabalin1H2/massa_molarH2, molsO2=cabalin1O2/massa_molarO2;
     double fraccio_molarH2=molsH2/(molsH2+molsO2), fraccio_molarO2=molsO2/(molsH2+molsO2), massa_molar_cambra=fraccio_molarH2*massa_molarH2+fraccio_molarO2*massa_molarO2;
@@ -42,9 +43,9 @@ int main(){
     double Rgas_cambra=Runiversal/massa_molar_cambra, Rhidrogen=Runiversal/massa_molarH2, Roxigen=Runiversal/massa_molarO2;
     double rhoin1=pin1/(Tin1*Rgas_cambra), rhoin3=pin3/(Tin3*Rhidrogen);
     double vin1=cabalin1Tot/(S1*rhoin1), vin3=cabalin3/(S3*rhoin3);
-    std::vector<double> x1(n,0), v1(n,0), T1(n,0), p1(n,0), rho1(n,0), v3(n,0),T3(n,0), p3(n,0), rho3(n,0), T2(n-1,Ttub2_inic), T4(n-1,Ttub4_inic);
+    std::vector<double> x1(n+1,0), v1(n+1,0), T1(n+1,0), p1(n+1,0), rho1(n+1,0), v3(n+1,0),T3(n+1,0), p3(n+1,0), rho3(n+1,0), T2(n,Ttub2_inic), T4(n,Ttub4_inic), alfa1(n,0);
     x1[0]=0;
-    for (int i = 1; i < n; i++)
+    for (int i = 1; i < n+1; i++)
     {
         x1[i]=x1[i-1]+Deltax;
     }
@@ -54,7 +55,7 @@ int main(){
     v1[0]=vin1; T1[0]=Tin1; p1[0]=pin1; rho1[0]=rhoin1;
     fluid H2cambra, O2cambra, H2ext, mescla_cambra;
    
-    for (int i=1; i<n-1; i++){
+    for (int i=1; i<n+1; i++){
         v1[i]=v1[i-1]; 
         p1[i]=p1[i-1]; 
         T1[i]=T1[i-1]; 
@@ -69,10 +70,11 @@ int main(){
             O2cambra.Propietats_termofisiquesO2(Ti,Pi,Roxigen);
             mescla_cambra.Propietats_termofisiquesmescla(Ti,Pi,Rgas_cambra,H2cambra.cp,O2cambra.cp,fraccio_molarH2,fraccio_molarO2,H2cambra.viscositat,O2cambra.viscositat,H2cambra.conductivitat,H2cambra.conductivitat);
             mescla_cambra.Calcul_Coeficients(mescla_cambra.viscositat,mescla_cambra.cp,mescla_cambra.conductivitat,Di,vi,mescla_cambra.densitat,rugositat2in,x1[i]);
+            alfa1[i-1]=mescla_cambra.Alfa_i;
             p1[i]=-cabalin1Tot*(v1[i]-v1[i-1])/S1+p1[i-1]-mescla_cambra.fregament*rhoi*pow(vi,2)/(2*S1)*pi*Di*Deltax;
-            double cA=cabalin1Tot*(pow(v1[i],2)-pow(v1[i-1],2))/2.0, cB=cabalin1Tot*mescla_cambra.cp+mescla_cambra.Alfa_i*Sl1/2; //Cal canviar el cp a la mitjana
+            double cA=cabalin1Tot*(pow(v1[i],2)-pow(v1[i-1],2))/2.0, cB=cabalin1Tot*mescla_cambra.cp+mescla_cambra.Alfa_i*Sl2int/2; //Cal canviar el cp a la mitjana
             //cout<<cA<<"  "<<cB<<endl;
-            T1[i]=(T1[i-1]*cabalin1Tot*mescla_cambra.cp-cA+Sl1*mescla_cambra.Alfa_i*(T2[i]-T1[i-1]/2))/cB;
+            T1[i]=(T1[i-1]*cabalin1Tot*mescla_cambra.cp-cA+Sl2int*mescla_cambra.Alfa_i*(T2[i]-T1[i-1]/2))/cB;
             rho1[i]=p1[i]/(T1[i]*Rgas_cambra);
             v1[i]=cabalin1Tot/(rho1[i]*S1);
             error=max(abs(p1[i]-pold), abs(Told-T1[i]));
@@ -82,7 +84,15 @@ int main(){
         
         
     }
-    
+    ofstream fout;
+    fout.open("Treball.csv");
+    fout<<"i"<<","<<"x1[i]"<<","<<"T1[i]"<<","<<"P1[i]"<<","<<"v1[i]"<<","<<"rho1[i]"<<","<<"alfa[i]"<<","<<"[i]"<<endl; //alfa, T2,T4[n]=0 perque no hi ha nodes
+    for (int i = 0; i < n+1; i++)
+    {   
+        fout<<i<<","<<x1[i]<<","<<T1[i]<<","<<p1[i]<<","<<v1[i]<<","<<rho1[i]<<","<<alfa1[i]<<endl;
+        
+        
+    }
     
 }
 
