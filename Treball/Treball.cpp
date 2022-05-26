@@ -12,7 +12,7 @@ class fluid
     void Calcul_Coeficients(double mu, double cp, double lambda, double D, double v, double rho, double rugositat_relativa, double x);
     void Propietats_termofisiquesH2(double T, double P,double Rgas);
     void Propietats_termofisiquesO2(double T, double P,double Rgas);
-    void Propietats_termofisiquesmescla(double T, double P,double Rgas,double cpA,double cpB, double muA, double muB, double conductivitatA, double conductivitatB);
+    void Propietats_termofisiquesmescla(double T, double P,double Rgas,double cpA,double cpB,double fmolA,double fmolB, double muA, double muB, double conductivitatA, double conductivitatB);
 };
 
 
@@ -40,7 +40,6 @@ int main(){
     double fraccio_molarH2=molsH2/(molsH2+molsO2), fraccio_molarO2=molsO2/(molsH2+molsO2), massa_molar_cambra=fraccio_molarH2*massa_molarH2+fraccio_molarO2*massa_molarO2;
     cout<<fraccio_molarH2<<"  "<<fraccio_molarO2<<"  "<<massa_molar_cambra<<endl;
     double Rgas_cambra=Runiversal/massa_molar_cambra, Rhidrogen=Runiversal/massa_molarH2, Roxigen=Runiversal/massa_molarO2;
-    std::cout<<Rgas_cambra<<std::endl;
     double rhoin1=pin1/(Tin1*Rgas_cambra), rhoin3=pin3/(Tin3*Rhidrogen);
     double vin1=cabalin1Tot/(S1*rhoin1), vin3=cabalin3/(S3*rhoin3);
     std::vector<double> x1(n,0), v1(n,0), T1(n,0), p1(n,0), rho1(n,0), v3(n,0),T3(n,0), p3(n,0), rho3(n,0), T2(n-1,Ttub2_inic), T4(n-1,Ttub4_inic);
@@ -50,7 +49,7 @@ int main(){
         x1[i]=x1[i-1]+Deltax;
     }
     
-    double error=1.0;
+   
     //Zona 1
     v1[0]=vin1; T1[0]=Tin1; p1[0]=pin1; rho1[0]=rhoin1;
     fluid H2cambra, O2cambra, H2ext, mescla_cambra;
@@ -60,24 +59,25 @@ int main(){
         p1[i]=p1[i-1]; 
         T1[i]=T1[i-1]; 
         rho1[i]=rho1[i-1];
-        //std::cout<<v1[i]<<std::endl;
         
-        
-        while (1){
-            int b=453;
-            cout<<23;//<<"  "<<endl;
-            //T1[i-1]<<endl;
-            
-            //double Ti=(T1[i]+T1[i-1])/2, Pi=(p1[i-1]+p1[i])/2,vi=(v1[i]+v1[i-1])/2,rhoi=(rho1[i]+rho1[i-1])/2;
-            //H2cambra.Propietats_termofisiquesH2(Ti,Pi,Rgas_cambra); 
-            //O2cambra.Propietats_termofisiquesO2(Ti,Pi,Roxigen);
-            //mescla_cambra.Propietats_termofisiquesmescla(Ti,Pi,Rgas_cambra,H2cambra.cp,O2cambra.cp,H2cambra.viscositat,O2cambra.viscositat,H2cambra.conductivitat,H2cambra.conductivitat);
-            //mescla_cambra.Calcul_Coeficients(mescla_cambra.viscositat,mescla_cambra.cp,mescla_cambra.conductivitat,Di,vi,mescla_cambra.densitat,rugositat2in,x1[i]);
-            int a = sqrt(23); 
-            cout<<a<<endl;
-            //p1[i]=-cabalin1Tot*(v1[i]-v1[i-1])+p1[i-1]*S1-mescla_cambra.fregament*rhoi*pow(vi,2)/2*pi*Di*Deltax;
-            //double cA=cabalin1Tot*(pow(v1[i],2)-pow(v1[i-1],2))/2.0, cB=cabalin1Tot*mescla_cambra.cp+mescla_cambra.Alfa_i*Sl1/2; //Cal canviar el cp a la mitjana
-            //T1[i]=(T1[i-1]*cabalin1Tot*mescla_cambra.cp-cA+Sl1*mescla_cambra.Alfa_i*(T2[i]-T1[i-1]/2))/cB;
+        double error=1.0;
+       
+        while (error>delta){     
+            double pold=p1[i], Told=T1[i], vold=v1[i], rhoold=rho1[i]; 
+            double Ti=(T1[i]+T1[i-1])/2, Pi=(p1[i-1]+p1[i])/2,vi=(v1[i]+v1[i-1])/2,rhoi=(rho1[i]+rho1[i-1])/2;
+            H2cambra.Propietats_termofisiquesH2(Ti,Pi,Rhidrogen); 
+            O2cambra.Propietats_termofisiquesO2(Ti,Pi,Roxigen);
+            mescla_cambra.Propietats_termofisiquesmescla(Ti,Pi,Rgas_cambra,H2cambra.cp,O2cambra.cp,fraccio_molarH2,fraccio_molarO2,H2cambra.viscositat,O2cambra.viscositat,H2cambra.conductivitat,H2cambra.conductivitat);
+            mescla_cambra.Calcul_Coeficients(mescla_cambra.viscositat,mescla_cambra.cp,mescla_cambra.conductivitat,Di,vi,mescla_cambra.densitat,rugositat2in,x1[i]);
+            p1[i]=-cabalin1Tot*(v1[i]-v1[i-1])/S1+p1[i-1]-mescla_cambra.fregament*rhoi*pow(vi,2)/(2*S1)*pi*Di*Deltax;
+            double cA=cabalin1Tot*(pow(v1[i],2)-pow(v1[i-1],2))/2.0, cB=cabalin1Tot*mescla_cambra.cp+mescla_cambra.Alfa_i*Sl1/2; //Cal canviar el cp a la mitjana
+            //cout<<cA<<"  "<<cB<<endl;
+            T1[i]=(T1[i-1]*cabalin1Tot*mescla_cambra.cp-cA+Sl1*mescla_cambra.Alfa_i*(T2[i]-T1[i-1]/2))/cB;
+            rho1[i]=p1[i]/(T1[i]*Rgas_cambra);
+            v1[i]=cabalin1Tot/(rho1[i]*S1);
+            error=max(abs(p1[i]-pold), abs(Told-T1[i]));
+            error=max(abs(vold-v1[i]),error);
+            error=max(abs(rho1[i]-rhoold),error);
         }
         
         
@@ -100,11 +100,11 @@ void fluid::Calcul_Coeficients(double mu, double cp, double lambda, double D, do
     B=pow(37530/Reynolds,16);
     fregament=2*pow(pow(8/Reynolds,12)+1/pow(A+B,1.5),1.0/12.0);
 }
-void fluid::Propietats_termofisiquesmescla(double T, double P,double Rgas,double cpA,double cpB, double muA, double muB, double conductivitatA, double conductivitatB){
+void fluid::Propietats_termofisiquesmescla(double T, double P,double Rgas,double cpA,double cpB,double fmolA,double fmolB, double muA, double muB, double conductivitatA, double conductivitatB){
     densitat=P/(Rgas*T);
-    //Suposem que la viscositat, cp i conductivitat son la mitjana, de moment
+    //Suposem que la viscositat, i conductivitat son la mitjana, de moment
     viscositat=(muA+muB)/2;
-    cp=(cpA+cpB)/2;
+    cp=fmolA*cpA+cpB*fmolB;
     conductivitat=(conductivitatA+conductivitatB)/2;
 }
 
