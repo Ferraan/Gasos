@@ -10,8 +10,8 @@ using namespace std;
 auto start = chrono::high_resolution_clock::now();
 
 
-const int n = 1000; //Volums de control del fluid, n+1 nodes
-const double delta = 1e-10;
+const int n = 3000; //Volums de control del fluid, n+1 nodes
+const double delta = 1e-8;
 const double pi = 2 * acos(0.0);
 const double Runiversal=8.3144621;
 const double massa_molarH2=2e-3, massa_molarO2=32e-3;//Kg/mol
@@ -34,7 +34,7 @@ int main(){
     double Rgas_cambra=Runiversal/massa_molar_cambra, Rhidrogen=Runiversal/massa_molarH2, Roxigen=Runiversal/massa_molarO2, Raire=287;
     double rhoin1=pin1/(Tin1*Rgas_cambra), rhoin3=pin3/(Tin3*Rhidrogen);
     double vin1=cabalin1Tot/(S1*rhoin1), vin3=cabalin3/(S3*rhoin3);
-    std::vector<double> x1(n+1,0), v1(n+1,0), T1(n+1,0), p1(n+1,0), rho1(n+1,0), v3(n+1,0),T3(n+1,0), p3(n+1,0), rho3(n+1,0), T2(n,Ttub2_inic), T4(n,Ttub4_inic), alfa1(n,0), alfa3(n,0), alfa5(n,0);
+    std::vector<double> x1(n+1,0), v1(n+1,0), T1(n+1,0), p1(n+1,0), rho1(n+1,0), v3(n+1,0),T3(n+1,0), p3(n+1,0), rho3(n+1,0), T2(n,Ttub2_inic), T4(n,Ttub4_inic), alfa1(n,0), alfa3(n,0), alfa5(n,0), f1(n,0), f3(n,0);
     x1[0]=0;
     for (int i = 1; i < n+1; i++)
     {
@@ -94,6 +94,8 @@ int main(){
             aire.Propietats_termofisiquesaire(Tm,Pext,Raire);
             aire.Calcul_coeficients_exterior(aire.cp,aire.conductivitat,aire.viscositat,g,aire.beta,aire.densitat,T4[i],Text,DOut);
             alfa5[i-1]=aire.Alfa_i;
+            f1[i-1]=mescla_cambra.fregament;
+            
         }
         std::vector<double> aP(n), aE(n), aW(n), bP(n);
         //Tub 2 
@@ -135,7 +137,26 @@ int main(){
         errorext=max(abs(T4[n/2]-T4old),abs(T2[n/2]-T2old));
         
     }
-
+    //Validacions
+    double Q_tub2=0,Q_tub4;
+    for (int i = 0; i < n+1; i++)
+    {
+        Q_tub2=alfa1[i]*Sl2int-alfa3[i]*Sl2out+Q_tub2, Q_tub4=alfa3[i]*Sl4in-alfa5[i]*Sl4out+Q_tub4;
+        
+    }
+    cout<<"Tubs:"<<Q_tub2<<","<<Q_tub4<<endl;
+    //Conservacio massa tub 1 i 3
+    double cons_massa1=rho1[0]*v1[0]-rho1[n]*v1[n],cons_massa3=rho3[0]*v3[0]-rho3[n]*v3[n];
+    cout<<"Massa:"<<cons_massa1<<","<<cons_massa3<<endl;
+    //Momentum tub 1
+    double fregament_total=0;
+    for (int i = 0; i < n; i++)
+    {
+        fregament_total=f1[i]*Sl2int*rho1[i]*pow(v1[i],2)/2+fregament_total;
+    }
+    
+    double cons_mom=(p1[0]-p1[n])*S1-fregament_total;
+    cout<<"Moment:"<<cons_mom<<endl;
     auto stop = chrono::high_resolution_clock::now();
     auto duration = chrono::duration_cast<chrono::microseconds>(stop - start);
     cout<<"Temps execucio (s)" <<static_cast<float>(duration.count())/1000000 << endl;
