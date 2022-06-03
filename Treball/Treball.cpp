@@ -11,7 +11,7 @@ using namespace std;
 auto start = chrono::high_resolution_clock::now();
 
 
-const int n = 2000; //Volums de control del fluid, n+1 nodes
+const int n = 50; //Volums de control del fluid, n+1 nodes
 const double delta = 1e-10;
 const double pi = 2 * acos(0.0);
 const double Runiversal=8.3144621;
@@ -110,7 +110,7 @@ int main(){
         aP[0]=aW[0]+aE[0]+alfa1[0]*Sl2int+alfa3[0]*Sl2out;
         for (int i = 1; i < n-1; i++)
         {
-            aE[i]=+Deltax/(Deltax/(2*condMolibde(T2[i]))+Deltax/(2*condMolibde(T2[i+1])))*Sx2/Deltax;
+            aE[i]=Deltax/(Deltax/(2*condMolibde(T2[i]))+Deltax/(2*condMolibde(T2[i+1])))*Sx2/Deltax;
             aW[i]=Deltax/(Deltax/(2*condMolibde(T2[i]))+Deltax/(2*condMolibde(T2[i-1])))*Sx2/Deltax; 
             bP[i]=(T1[i]+T1[i+1])/2*alfa1[i]*Sl2int+alfa3[i]*(T3[i]+T3[i+1])/2*Sl2out;
             aP[i]=aW[i]+aE[i]+alfa1[i]*Sl2int+alfa3[i]*Sl2out;
@@ -131,8 +131,6 @@ int main(){
             aW[i]=Deltax/(Deltax/(2*condMolibde(T4[i]))+Deltax/(2*condMolibde(T4[i-1])))*Sx4/Deltax; 
             bP[i]=(T3[i]+T3[i+1])/2*alfa3[i]*Sl4in+alfa5[i]*Text*Sl4out;
             aP[i]=aW[i]+aE[i]+alfa3[i]*Sl4in+alfa5[i]*Sl4out;
-            
-            
         }
         aE[n-1]=0;//Adiabatic
         aW[n-1]=Deltax/(Deltax/(2*condMolibde(T4[n-2]))+Deltax/(2*condMolibde(T4[n-1])))*Sx4/Deltax;
@@ -150,8 +148,7 @@ int main(){
     //Calor en els tubs=0
     double Q_tub2=0,Q_tub4=0;
     for (int i = 0; i < n; i++)
-    {
-        
+    {    
         Q_tub2=alfa1[i]*Sl2int*((T1[i]+T1[i+1])/2-T2[i])-alfa3[i]*Sl2out*(-(T3[i]+T3[i+1])/2+T2[i])+Q_tub2;
         Q_tub4=alfa3[i]*Sl4in*((T3[i]+T3[i+1])/2-T4[i])-alfa5[i]*Sl4out*(-Text+T4[i])+Q_tub4;
     }
