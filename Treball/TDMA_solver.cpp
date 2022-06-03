@@ -1,7 +1,7 @@
 #include "solvers.h"
 #include <vector>
 #include <cmath>
-
+#include <iostream>
 int solverTDMA(std::vector<double>& T,std::vector<double> aP,std::vector<double> aW, std::vector<double> aE, std::vector<double> bP,const int n){
     std::vector<double> P(n);
     std::vector<double> R(n);

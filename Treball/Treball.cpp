@@ -4,14 +4,15 @@
 #include <fstream>
 #include <iomanip>
 #include <chrono>
+#include <bits/stdc++.h>
 #include "solvers.h"
 #include "Propietats_termofisiques.h"
 using namespace std;
 auto start = chrono::high_resolution_clock::now();
 
 
-const int n = 3000; //Volums de control del fluid, n+1 nodes
-const double delta = 1e-8;
+const int n = 2000; //Volums de control del fluid, n+1 nodes
+const double delta = 1e-10;
 const double pi = 2 * acos(0.0);
 const double Runiversal=8.3144621;
 const double massa_molarH2=2e-3, massa_molarO2=32e-3;//Kg/mol
@@ -70,6 +71,7 @@ int main(){
                 error=max(abs(p1[i]-pold), abs(Told-T1[i]));
                 error=max(abs(vold-v1[i]),error);
                 error=max(abs(rho1[i]-rhoold),error);
+                f1[i-1]=mescla_cambra.fregament;
             }
             //Zona 3
             v3[i]=v3[i-1]; p3[i]=p3[i-1]; T3[i]=T3[i-1]; rho3[i]=rho3[i-1];
@@ -80,7 +82,7 @@ int main(){
                 H2ext.Propietats_termofisiquesH2(Ti,Pi,Rhidrogen);    
                 H2ext.Calcul_Coeficients(H2ext.viscositat,H2ext.cp,H2ext.conductivitat,Dh,vi,H2ext.densitat,rugositat2ext);
                 alfa3[i-1]=H2ext.Alfa_i;
-                p3[i]=-cabalin3*(v3[i]-v3[i-1])/S3+p3[i-1]-H2ext.fregament*rhoi*pow(vi,2)/(2*S3)*pi*Dh*Deltax;
+                p3[i]=-cabalin3*(v3[i]-v3[i-1])/S3+p3[i-1]-H2ext.fregament*rhoi*pow(vi,2)/S3*pi*Dh*Deltax;
                 double cA=cabalin1Tot*(pow(v1[i],2)-pow(v1[i-1],2))/2.0, cB=cabalin3*H2ext.cp+H2ext.Alfa_i/2 *(Sl2out+Sl4in);
                 T3[i]=(T3[i-1]*(cabalin3*H2ext.cp-H2ext.Alfa_i/2*(Sl2out+Sl4in))-cA+H2ext.Alfa_i*(T2[i-1]*Sl2out+T4[i-1]*Sl4in))/cB;
                 rho3[i]=p3[i]/(T3[i]*Rhidrogen);
@@ -94,65 +96,74 @@ int main(){
             aire.Propietats_termofisiquesaire(Tm,Pext,Raire);
             aire.Calcul_coeficients_exterior(aire.cp,aire.conductivitat,aire.viscositat,g,aire.beta,aire.densitat,T4[i],Text,DOut);
             alfa5[i-1]=aire.Alfa_i;
-            f1[i-1]=mescla_cambra.fregament;
+            
             
         }
         std::vector<double> aP(n), aE(n), aW(n), bP(n);
         //Tub 2 
-        double T2old=T2[n/2];    
-        aE[0]=-Deltax/(Deltax/(2*condMolibde(T2[0]))+Deltax/(2*condMolibde(T2[1])))*Sx2/Deltax;
+        std::vector<double> T2old(n),T4old(n), dif(n);
+        T2old=T2;
+        T4old=T4;
+        aE[0]=Deltax/(Deltax/(2*condMolibde(T2[0]))+Deltax/(2*condMolibde(T2[1])))*Sx2/Deltax;
         aW[0]=0; //Adiabatic
-        bP[0]=-(T1[0]+T1[1])/2*alfa1[0]*Sl2int-alfa3[0]*(T3[0]+T3[1])/2*Sl2out;
-        aP[0]=aW[0]+aE[0]-alfa1[0]*Sl2int-alfa3[0]*Sl2out;
+        bP[0]=(T1[0]+T1[1])/2*alfa1[0]*Sl2int+alfa3[0]*(T3[0]+T3[1])/2*Sl2out;
+        aP[0]=aW[0]+aE[0]+alfa1[0]*Sl2int+alfa3[0]*Sl2out;
         for (int i = 1; i < n-1; i++)
         {
-            aE[i]=-Deltax/(Deltax/(2*condMolibde(T2[i]))+Deltax/(2*condMolibde(T2[i+1])))*Sx2/Deltax;
-            aW[i]=Deltax/(Deltax/(2*condMolibde(T2[i]))+Deltax/(2*condMolibde(T2[i-1])))*Sx2/Deltax; //Adiabatic
-            bP[i]=-(T1[i]+T1[i+1])/2*alfa1[i]*Sl2int-alfa3[i]*(T3[i]+T3[i+1])/2*Sl2out;
-            aP[i]=aW[i]+aE[i]-alfa1[i]*Sl2int-alfa3[i]*Sl2out;
+            aE[i]=+Deltax/(Deltax/(2*condMolibde(T2[i]))+Deltax/(2*condMolibde(T2[i+1])))*Sx2/Deltax;
+            aW[i]=Deltax/(Deltax/(2*condMolibde(T2[i]))+Deltax/(2*condMolibde(T2[i-1])))*Sx2/Deltax; 
+            bP[i]=(T1[i]+T1[i+1])/2*alfa1[i]*Sl2int+alfa3[i]*(T3[i]+T3[i+1])/2*Sl2out;
+            aP[i]=aW[i]+aE[i]+alfa1[i]*Sl2int+alfa3[i]*Sl2out;
         }
         aE[n-1]=0;//Adiabatic
         aW[n-1]=Deltax/(Deltax/(2*condMolibde(T2[n-2]))+Deltax/(2*condMolibde(T2[n-1])))*Sx2/Deltax;
-        bP[n-1]=-(T1[n-1]+T1[n])/2*alfa1[n-1]*Sl2int-alfa3[n-1]*(T3[n-1]+T3[n])/2*Sl2out;
-        aP[n-1]=aW[n-1]+aE[n-1]-alfa1[n-1]*Sl2int-alfa3[n-1]*Sl2out;
+        bP[n-1]=(T1[n-1]+T1[n])/2*alfa1[n-1]*Sl2int+alfa3[n-1]*(T3[n-1]+T3[n])/2*Sl2out;
+        aP[n-1]=aW[n-1]+aE[n-1]+alfa1[n-1]*Sl2int+alfa3[n-1]*Sl2out;
         solverTDMA(T2,aP,aW,aE,bP,n);
         //Tub 4
-        double T4old=T4[n/2];
-        aE[0]=-Deltax/(Deltax/(2*condMolibde(T4[0]))+Deltax/(2*condMolibde(T4[1])))*Sx4/Deltax;
+        aE[0]=Deltax/(Deltax/(2*condMolibde(T4[0]))+Deltax/(2*condMolibde(T4[1])))*Sx4/Deltax;
         aW[0]=0; //Adiabatic
-        bP[0]=-(T3[0]+T3[1])/2*alfa3[0]*Sl4in-alfa5[0]*Text*Sl4out;
-        aP[0]=aW[0]+aE[0]-alfa3[0]*Sl4in-alfa5[0]*Sl4out;
+        bP[0]=(T3[0]+T3[1])/2*alfa3[0]*Sl4in+alfa5[0]*Text*Sl4out;
+        aP[0]=aW[0]+aE[0]+alfa3[0]*Sl4in+alfa5[0]*Sl4out;
         for (int i = 1; i < n-1; i++)
         {
-            aE[i]=-Deltax/(Deltax/(2*condMolibde(T4[i]))+Deltax/(2*condMolibde(T4[i+1])))*Sx4/Deltax;
-            aW[i]=Deltax/(Deltax/(2*condMolibde(T4[i]))+Deltax/(2*condMolibde(T4[i-1])))*Sx4/Deltax; //Adiabatic
-            bP[i]=-(T3[i]+T3[i+1])/2*alfa3[i]*Sl4in-alfa5[i]*Text*Sl4out;
-            aP[i]=aW[i]+aE[i]-alfa3[i]*Sl4in-alfa5[i]*Sl4out;
+            aE[i]=Deltax/(Deltax/(2*condMolibde(T4[i]))+Deltax/(2*condMolibde(T4[i+1])))*Sx4/Deltax;
+            aW[i]=Deltax/(Deltax/(2*condMolibde(T4[i]))+Deltax/(2*condMolibde(T4[i-1])))*Sx4/Deltax; 
+            bP[i]=(T3[i]+T3[i+1])/2*alfa3[i]*Sl4in+alfa5[i]*Text*Sl4out;
+            aP[i]=aW[i]+aE[i]+alfa3[i]*Sl4in+alfa5[i]*Sl4out;
+            
+            
         }
         aE[n-1]=0;//Adiabatic
         aW[n-1]=Deltax/(Deltax/(2*condMolibde(T4[n-2]))+Deltax/(2*condMolibde(T4[n-1])))*Sx4/Deltax;
-        bP[n-1]=-(T3[n-1]+T3[n])/2*alfa3[n-1]*Sl4in-alfa5[n-1]*Text*Sl4out;
-        aP[n-1]=aW[n-1]+aE[n-1]-alfa3[n-1]*Sl4in-alfa5[n-1]*Sl4out;
+        bP[n-1]=(T3[n-1]+T3[n])/2*alfa3[n-1]*Sl4in+alfa5[n-1]*Text*Sl4out;
+        aP[n-1]=aW[n-1]+aE[n-1]+alfa3[n-1]*Sl4in+alfa5[n-1]*Sl4out;
         solverTDMA(T4,aP,aW,aE,bP,n);
-        errorext=max(abs(T4[n/2]-T4old),abs(T2[n/2]-T2old));
-        
+        //Error  
+        for (int i = 0; i < n-1; i++)
+        {
+            dif[i]=max(abs(T2old[i]-T2[i]),abs(T4old[i]-T4[i]));
+        }
+        errorext=*max_element(dif.begin(),dif.end() );
     }
     //Validacions
-    double Q_tub2=0,Q_tub4;
-    for (int i = 0; i < n+1; i++)
+    //Calor en els tubs=0
+    double Q_tub2=0,Q_tub4=0;
+    for (int i = 0; i < n; i++)
     {
-        Q_tub2=alfa1[i]*Sl2int-alfa3[i]*Sl2out+Q_tub2, Q_tub4=alfa3[i]*Sl4in-alfa5[i]*Sl4out+Q_tub4;
         
+        Q_tub2=alfa1[i]*Sl2int*((T1[i]+T1[i+1])/2-T2[i])-alfa3[i]*Sl2out*(-(T3[i]+T3[i+1])/2+T2[i])+Q_tub2;
+        Q_tub4=alfa3[i]*Sl4in*((T3[i]+T3[i+1])/2-T4[i])-alfa5[i]*Sl4out*(-Text+T4[i])+Q_tub4;
     }
-    cout<<"Tubs:"<<Q_tub2<<","<<Q_tub4<<endl;
+    cout<<"Tub 2: "<<Q_tub2<<", Tub 4: "<<Q_tub4<<endl;
     //Conservacio massa tub 1 i 3
     double cons_massa1=rho1[0]*v1[0]-rho1[n]*v1[n],cons_massa3=rho3[0]*v3[0]-rho3[n]*v3[n];
     cout<<"Massa:"<<cons_massa1<<","<<cons_massa3<<endl;
     //Momentum tub 1
     double fregament_total=0;
-    for (int i = 0; i < n; i++)
+    for (int i = 0; i < n-1; i++)
     {
-        fregament_total=f1[i]*Sl2int*rho1[i]*pow(v1[i],2)/2+fregament_total;
+        fregament_total=f1[i]*Sl2int*(rho1[i]+rho1[i+1])/2*pow(v1[i],2)/2+fregament_total;
     }
     
     double cons_mom=(p1[0]-p1[n])*S1-fregament_total;
