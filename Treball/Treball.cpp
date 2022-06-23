@@ -24,7 +24,7 @@ int main(){
     double L=0.5, Di=0.02, Do=0.023, Dm=0.033, DOut=0.035;
     double Tin1=1000, pin1=161e+5, Tin3=100, cabalin3=0.005, pin3=150e+5, Text=300, Pext=101325;
     double cabalin1H2=0.005, cabalin1O2=0.05, cabalin1Tot=cabalin1H2+cabalin1O2;
-    double Ttub2_inic=800, Ttub4_inic=500;
+    double Tcc=1000, Ttub2_inic=800, Ttub4_inic=500;
     double rugositat2in=0.0002, rugositat2ext=0.0003, rugositat4in=0.0004, rugositat4ext=0.0002;
     
     //Calculs previs
@@ -44,43 +44,21 @@ int main(){
     
    
     //Zona 1 i 3
-    v1[0]=vin1; T1[0]=Tin1; p1[0]=pin1; rho1[0]=rhoin1;
     v3[0]=vin3; T3[0]=Tin3; p3[0]=pin3; rho3[0]=rhoin3;
-    fluid H2cambra, O2cambra, H2ext, mescla_cambra, aire;
+    fluid H2ext, mescla_cambra, aire;
+    H2ext.Propietats_termofisiquesH2(500,600,100000,287);    
     double errorext=1;
     while(errorext>delta){
-        for (int i=1; i<n+1; i++){
-            v1[i]=v1[i-1]; p1[i]=p1[i-1]; T1[i]=T1[i-1]; rho1[i]=rho1[i-1];
-            
-            double error=1.0;
-        
-            while (error>delta){     
-                double pold=p1[i], Told=T1[i], vold=v1[i], rhoold=rho1[i]; 
-                double Ti=(T1[i]+T1[i-1])/2, Pi=(p1[i-1]+p1[i])/2,vi=(v1[i]+v1[i-1])/2,rhoi=(rho1[i]+rho1[i-1])/2;
-                H2cambra.Propietats_termofisiquesH2(Ti,Pi,Rhidrogen); 
-                O2cambra.Propietats_termofisiquesO2(Ti,Pi,Roxigen);
-                mescla_cambra.Propietats_termofisiquesmescla(Ti,Pi,Rgas_cambra,H2cambra.cp,O2cambra.cp,fraccio_molarH2,fraccio_molarO2,H2cambra.viscositat,O2cambra.viscositat,H2cambra.conductivitat,H2cambra.conductivitat);
-                mescla_cambra.Calcul_Coeficients(mescla_cambra.viscositat,mescla_cambra.cp,mescla_cambra.conductivitat,Di,vi,mescla_cambra.densitat,rugositat2in);
-                alfa1[i-1]=mescla_cambra.Alfa_i;
-                p1[i]=-cabalin1Tot*(v1[i]-v1[i-1])/S1+p1[i-1]-mescla_cambra.fregament*rhoi*pow(vi,2)/(2*S1)*pi*Di*Deltax;
-                double cA=cabalin1Tot*(pow(v1[i],2)-pow(v1[i-1],2))/2.0, cB=cabalin1Tot*mescla_cambra.cp+mescla_cambra.Alfa_i*Sl2int/2; //Cal canviar el cp a la mitjana
-                //cout<<cA<<"  "<<cB<<endl;
-                T1[i]=(T1[i-1]*cabalin1Tot*mescla_cambra.cp-cA+Sl2int*mescla_cambra.Alfa_i*(T2[i]-T1[i-1]/2))/cB;
-                rho1[i]=p1[i]/(T1[i]*Rgas_cambra);
-                v1[i]=cabalin1Tot/(rho1[i]*S1);
-                error=max(abs(p1[i]-pold), abs(Told-T1[i]));
-                error=max(abs(vold-v1[i]),error);
-                error=max(abs(rho1[i]-rhoold),error);
-                f1[i-1]=mescla_cambra.fregament;
-            }
+
+        for (int i=1; i<n+1; i++){           
             //Zona 3
             v3[i]=v3[i-1]; p3[i]=p3[i-1]; T3[i]=T3[i-1]; rho3[i]=rho3[i-1];
-            error=1;
+            double error=1.0;
             while (error>delta){     
                 double pold=p3[i], Told=T3[i], vold=v3[i], rhoold=rho3[i]; 
                 double Ti=(T3[i]+T3[i-1])/2, Pi=(p3[i-1]+p3[i])/2,vi=(v3[i]+v3[i-1])/2,rhoi=(rho3[i]+rho3[i-1])/2;
-                H2ext.Propietats_termofisiquesH2(Ti,Pi,Rhidrogen);    
-                H2ext.Calcul_Coeficients(H2ext.viscositat,H2ext.cp,H2ext.conductivitat,Dh,vi,H2ext.densitat,rugositat2ext);
+                H2ext.Propietats_termofisiquesH2(T3[i-1],T3[i],Pi,Rhidrogen);    
+                H2ext.Calcul_Coeficients_anular(H2ext.viscositat,H2ext.cp,H2ext.conductivitat,Dh,vi,H2ext.densitat,rugositat2ext);
                 alfa3[i-1]=H2ext.Alfa_i;
                 p3[i]=-cabalin3*(v3[i]-v3[i-1])/S3+p3[i-1]-H2ext.fregament*rhoi*pow(vi,2)/S3*pi*Dh*Deltax;
                 double cA=cabalin1Tot*(pow(v1[i],2)-pow(v1[i-1],2))/2.0, cB=cabalin3*H2ext.cp+H2ext.Alfa_i/2 *(Sl2out+Sl4in);
@@ -152,22 +130,23 @@ int main(){
         Q_tub2=alfa1[i]*Sl2int*((T1[i]+T1[i+1])/2-T2[i])-alfa3[i]*Sl2out*(-(T3[i]+T3[i+1])/2+T2[i])+Q_tub2;
         Q_tub4=alfa3[i]*Sl4in*((T3[i]+T3[i+1])/2-T4[i])-alfa5[i]*Sl4out*(-Text+T4[i])+Q_tub4;
     }
-    cout<<"Tub 2: "<<Q_tub2<<", Tub 4: "<<Q_tub4<<endl;
-    //Conservacio massa tub 1 i 3
-    double cons_massa1=rho1[0]*v1[0]-rho1[n]*v1[n],cons_massa3=rho3[0]*v3[0]-rho3[n]*v3[n];
-    cout<<"Massa:"<<cons_massa1<<","<<cons_massa3<<endl;
-    //Momentum tub 1
+    std::cout<<"Tub 2: "<<Q_tub2<<", Tub 4: "<<Q_tub4<<endl;
+    //Conservacio massa tub
+    double cons_massa3=rho3[0]*v3[0]-rho3[n]*v3[n];
+    std::cout<<"Massa:"<<cons_massa3<<endl;
+    //Momentum tub 3
     double fregament_total=0;
-    for (int i = 0; i < n-1; i++)
+    /*     for (int i = 0; i < n-1; i++)
     {
         fregament_total=f1[i]*Sl2int*(rho1[i]+rho1[i+1])/2*pow(v1[i],2)/2+fregament_total;
     }
     
     double cons_mom=(p1[0]-p1[n])*S1-fregament_total;
-    cout<<"Moment:"<<cons_mom<<endl;
+    cout<<"Moment:"<<cons_mom<<endl; */
+    
     auto stop = chrono::high_resolution_clock::now();
     auto duration = chrono::duration_cast<chrono::microseconds>(stop - start);
-    cout<<"Temps execucio (s)" <<static_cast<float>(duration.count())/1000000 << endl;
+    std::cout<<"Temps execucio (s)" <<static_cast<float>(duration.count())/1000000 << endl;
     
     
     ofstream fout;
