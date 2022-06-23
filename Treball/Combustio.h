@@ -1,0 +1,1 @@
+double Tcc(double fraccio_molarO2, double fraccio_molarH2, double cabalH2,double cabalO2);
