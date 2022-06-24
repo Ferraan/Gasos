@@ -1,1 +1,1 @@
-double Tcc(double fraccio_molarO2, double fraccio_molarH2, double cabalH2,double cabalO2);
+double Tcc(double cabalH2,double cabalO2,double TinH2, double TinO2,double delta,double Qlost,double Tcc);

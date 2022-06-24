@@ -7,6 +7,7 @@
 #include <bits/stdc++.h>
 #include "solvers.h"
 #include "Propietats_termofisiques.h"
+#include "Combustio.h"
 using namespace std;
 auto start = chrono::high_resolution_clock::now();
 
@@ -23,8 +24,8 @@ int main(){
     std::scientific;
     double L=0.5, Di=0.02, Do=0.023, Dm=0.033, DOut=0.035;
     double Tin1=1000, pin1=161e+5, Tin3=100, cabalin3=0.005, pin3=150e+5, Text=300, Pext=101325;
-    double cabalin1H2=0.005, cabalin1O2=0.05, cabalin1Tot=cabalin1H2+cabalin1O2;
-    double Tcc=1000, Ttub2_inic=800, Ttub4_inic=500;
+    double cabalin1H2=41.2, cabalin1O2=208.8, cabalin1Tot=cabalin1H2+cabalin1O2;
+    double Tcomb=1000, Ttub2_inic=800, Ttub4_inic=500;
     double rugositat2in=0.0002, rugositat2ext=0.0003, rugositat4in=0.0004, rugositat4ext=0.0002;
     
     //Calculs previs
@@ -42,7 +43,7 @@ int main(){
         x1[i]=x1[i-1]+Deltax;
     }
     
-   
+    Tcomb=Tcc(cabalin1H2,cabalin1O2,500,500,delta,0,3000);
     //Zona 1 i 3
     v3[0]=vin3; T3[0]=Tin3; p3[0]=pin3; rho3[0]=rhoin3;
     fluid H2ext, mescla_cambra, aire;
