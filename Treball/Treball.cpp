@@ -22,15 +22,15 @@ const double g=9.81;
 int main(){
     std::cout.precision(15);
     std::scientific;
-    double L=0.5, Di=0.02, Do=0.023, Dm=0.033, DOut=0.035;
+    double L=0.5, D1=0.02, D2=0.023, D3=0.033, D4=0.035;
     double Tin1=1000, pin1=161e+5, Tin3=100, cabalin3=0.005, pin3=150e+5, Text=300, Pext=101325;
     double cabalin1H2=41.2, cabalin1O2=208.8, cabalin1Tot=cabalin1H2+cabalin1O2;
     double Tcomb=1000, Ttub2_inic=800, Ttub4_inic=500;
     double rugositat2in=0.0002, rugositat2ext=0.0003, rugositat4in=0.0004, rugositat4ext=0.0002;
     
     //Calculs previs
-    double Deltax=L/n, Dh=Dm-Do;
-    double S1=pi*Di*Di/4, S3=pi*pow(Dm-Do,2)/4, Sl2int=pi*Di*Deltax, Sl2out=pi*Do*Deltax, Sl4in=pi*Dm*Deltax, Sl4out=pi*DOut*Deltax, Sx2=pi*(pow(Do/2,2)-pow(Di/2,2)),  Sx4=pi*(pow(DOut/2,2)-pow(Dm/2,2));
+    double Deltax=L/n, Dh=D3-D2;
+    double S1=pi*D1*D1/4, S3=pi*pow(D3-D2,2)/4, Sl2int=pi*D1*Deltax, Sl2out=pi*D2*Deltax, Sl4in=pi*D3*Deltax, Sl4out=pi*D4*Deltax, Sx2=pi*(pow(D2/2,2)-pow(D1/2,2)),  Sx4=pi*(pow(D4/2,2)-pow(D3/2,2));
     double molsH2=cabalin1H2/massa_molarH2, molsO2=cabalin1O2/massa_molarO2;
     double fraccio_molarH2=molsH2/(molsH2+molsO2), fraccio_molarO2=molsO2/(molsH2+molsO2), massa_molar_cambra=fraccio_molarH2*massa_molarH2+fraccio_molarO2*massa_molarO2;
     double Rgas_cambra=Runiversal/massa_molar_cambra, Rhidrogen=Runiversal/massa_molarH2, Roxigen=Runiversal/massa_molarO2, Raire=287;
@@ -73,18 +73,18 @@ int main(){
             //Zona exterior
             double Tm=(T4[i]+Text)/2;
             aire.Propietats_termofisiquesaire(Tm,Pext,Raire);
-            aire.Calcul_coeficients_exterior(aire.cp,aire.conductivitat,aire.viscositat,g,aire.beta,aire.densitat,T4[i],Text,DOut);
+            aire.Calcul_coeficients_exterior(aire.cp,aire.conductivitat,aire.viscositat,g,aire.beta,aire.densitat,T4[i],Text,D4);
             alfa5[i-1]=aire.Alfa_i;
             
             
         }
         std::vector<double> aP(n), aE(n), aW(n), bP(n);
         //Tub 2 
-        std::vector<double> T2old(n),T4old(n), dif(n);
+        std::vector<double> T2old(n),T4old(n), D1f(n);
         T2old=T2;
         T4old=T4;
         aE[0]=Deltax/(Deltax/(2*condMolibde(T2[0]))+Deltax/(2*condMolibde(T2[1])))*Sx2/Deltax;
-        aW[0]=0; //Adiabatic
+        aW[0]=0; //AD1abatic
         bP[0]=(T1[0]+T1[1])/2*alfa1[0]*Sl2int+alfa3[0]*(T3[0]+T3[1])/2*Sl2out;
         aP[0]=aW[0]+aE[0]+alfa1[0]*Sl2int+alfa3[0]*Sl2out;
         for (int i = 1; i < n-1; i++)
@@ -94,14 +94,14 @@ int main(){
             bP[i]=(T1[i]+T1[i+1])/2*alfa1[i]*Sl2int+alfa3[i]*(T3[i]+T3[i+1])/2*Sl2out;
             aP[i]=aW[i]+aE[i]+alfa1[i]*Sl2int+alfa3[i]*Sl2out;
         }
-        aE[n-1]=0;//Adiabatic
+        aE[n-1]=0;//AD1abatic
         aW[n-1]=Deltax/(Deltax/(2*condMolibde(T2[n-2]))+Deltax/(2*condMolibde(T2[n-1])))*Sx2/Deltax;
         bP[n-1]=(T1[n-1]+T1[n])/2*alfa1[n-1]*Sl2int+alfa3[n-1]*(T3[n-1]+T3[n])/2*Sl2out;
         aP[n-1]=aW[n-1]+aE[n-1]+alfa1[n-1]*Sl2int+alfa3[n-1]*Sl2out;
         solverTDMA(T2,aP,aW,aE,bP,n);
         //Tub 4
         aE[0]=Deltax/(Deltax/(2*condMolibde(T4[0]))+Deltax/(2*condMolibde(T4[1])))*Sx4/Deltax;
-        aW[0]=0; //Adiabatic
+        aW[0]=0; //AD1abatic
         bP[0]=(T3[0]+T3[1])/2*alfa3[0]*Sl4in+alfa5[0]*Text*Sl4out;
         aP[0]=aW[0]+aE[0]+alfa3[0]*Sl4in+alfa5[0]*Sl4out;
         for (int i = 1; i < n-1; i++)
@@ -111,7 +111,7 @@ int main(){
             bP[i]=(T3[i]+T3[i+1])/2*alfa3[i]*Sl4in+alfa5[i]*Text*Sl4out;
             aP[i]=aW[i]+aE[i]+alfa3[i]*Sl4in+alfa5[i]*Sl4out;
         }
-        aE[n-1]=0;//Adiabatic
+        aE[n-1]=0;//AD1abatic
         aW[n-1]=Deltax/(Deltax/(2*condMolibde(T4[n-2]))+Deltax/(2*condMolibde(T4[n-1])))*Sx4/Deltax;
         bP[n-1]=(T3[n-1]+T3[n])/2*alfa3[n-1]*Sl4in+alfa5[n-1]*Text*Sl4out;
         aP[n-1]=aW[n-1]+aE[n-1]+alfa3[n-1]*Sl4in+alfa5[n-1]*Sl4out;
@@ -119,9 +119,9 @@ int main(){
         //Error  
         for (int i = 0; i < n-1; i++)
         {
-            dif[i]=max(abs(T2old[i]-T2[i]),abs(T4old[i]-T4[i]));
+            D1f[i]=max(abs(T2old[i]-T2[i]),abs(T4old[i]-T4[i]));
         }
-        errorext=*max_element(dif.begin(),dif.end() );
+        errorext=*max_element(D1f.begin(),D1f.end() );
     }
     //Validacions
     //Calor en els tubs=0
