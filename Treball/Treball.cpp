@@ -44,6 +44,7 @@ int main(){
     }
     
     Tcomb=Tcc(cabalin1H2,cabalin1O2,500,500,delta,0,3000);
+
     //Zona 1 i 3
     v3[0]=vin3; T3[0]=Tin3; p3[0]=pin3; rho3[0]=rhoin3;
     fluid H2ext, mescla_cambra, aire;
@@ -147,7 +148,7 @@ int main(){
     
     auto stop = chrono::high_resolution_clock::now();
     auto duration = chrono::duration_cast<chrono::microseconds>(stop - start);
-    std::cout<<"Temps execucio (s)" <<static_cast<float>(duration.count())/1000000 << endl;
+    std::cout<<"Temps execucio (s)" <<static_cast<float>(duration.count())/1000000 << endl; 
     
     
     ofstream fout;

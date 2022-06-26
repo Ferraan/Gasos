@@ -100,6 +100,9 @@ void fluid::Propietats_termofisiquesH2O(double T0, double Tf, double P,double Rg
     double c01000=0.3033992490e+01, c11000=0.2176918040e-02,c21000=-0.1640725180e-06,c31000=-0.9704198700e-10,c41000=0.1682009920e-13; //cp de 1000 a 5000K
     double m0=-0.1286013492e+02, m1=-0.1377850379e+01, m2=0.4213981638e+00,m3=-0.2414423056e-01; //Lambda i mu valen el mateix de 200 a 5000K
     double l0=0.1185254026e+02 ,l1=-0.8965822807e+01,l2= 0.1528828068e+01,l3= -0.7590175979e-01;
+    double terme1=c0*T0+c1*pow(T0,2)/2+c2*pow(T0,3)/3+c3*pow(T0,4)/4+c4*pow(T0,5)/5;
+    double terme2=c0*Tf+c1*pow(Tf,2)/2+c2*pow(Tf,3)/3+c3*pow(Tf,4)/4+c4*pow(Tf,5)/5;
+    cp=(terme2-terme1)/(Tf-T0);
     if (T0==Tf and T0<1000){
         cp=c0+c1*T0+c2*pow(T0,2)+c3*pow(T0,3)+c4*pow(T0,4);
     }
@@ -126,7 +129,7 @@ void fluid::Propietats_termofisiquesH2O(double T0, double Tf, double P,double Rg
         double terme1=c01000*T0+c11000*pow(T0,2)/2+c21000*pow(T0,3)/3+c31000*pow(T0,4)/4+c41000*pow(T0,5)/5;
         double terme2=c01000*Tf+c11000*pow(Tf,2)/2+c21000*pow(Tf,3)/3+c31000*pow(Tf,4)/4+c41000*pow(Tf,5)/5;
         cp=(terme2-terme1)/(Tf-T0);
-    }
+    } 
     double T=(T0+Tf)/2;
     densitat=P/(Rgas*T);
     viscositat= exp(m0+m1*log(T)+m2*pow(log(T),2)+m3*pow(log(T),3));
