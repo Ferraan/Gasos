@@ -1,1 +1,1 @@
-double Tcc(double cabalH2,double cabalO2,double TinH2, double TinO2,double delta,double Qlost,double Tcc);
+double Tcc(double cabalH2,double cabalO2,double TinH2, double TinO2,double delta,double Qlost,double Tcc, double &v_H2O,double &v_H2exces, double v_O2exces);

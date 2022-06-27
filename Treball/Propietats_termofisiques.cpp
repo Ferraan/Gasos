@@ -2,8 +2,8 @@
 #include <math.h>
 #include "Propietats_termofisiques.h"
 
-
-void fluid::Calcul_Coeficients_anular(double mu, double cp, double lambda, double D, double v, double rho, double rugositat_relativa)
+const double R_universal=8.31447; //J/(mol K)
+void fluid::Calcul_var_adim(double mu, double cp, double lambda, double D, double v, double rho, double rugositat_relativa)
 {
     Reynolds=(rho*v*D)/mu;
     Prandt=mu*cp/lambda;
@@ -50,6 +50,7 @@ void fluid::Propietats_termofisiquesO2(double T0, double Tf, double P,double Rga
         double terme2=c01000*Tf+c11000*pow(Tf,2)/2+c21000*pow(Tf,3)/3+c31000*pow(Tf,4)/4+c41000*pow(Tf,5)/5;
         cp=(terme2-terme1)/(Tf-T0);
     }
+    cp=cp*R_universal;
     double T=(T0+Tf)/2;
     densitat=P/(Rgas*T);
     viscositat= exp(m0+m1*log(T)+m2*pow(log(T),2)+m3*pow(log(T),3));
@@ -87,8 +88,7 @@ void fluid::Propietats_termofisiquesH2(double T0, double Tf, double P,double Rga
         double terme2=c01000*Tf+c11000*pow(Tf,2)/2+c21000*pow(Tf,3)/3+c31000*pow(Tf,4)/4+c41000*pow(Tf,5)/5;
         cp=(terme2-terme1)/(Tf-T0);
     }
-    
-
+    cp=cp*R_universal; //J/(mol K)
     double T=(T0+Tf)/2;
     densitat=P/(Rgas*T);
     viscositat= exp(m0+m1*log(T)+m2*pow(log(T),2)+m3*pow(log(T),3));
@@ -100,9 +100,7 @@ void fluid::Propietats_termofisiquesH2O(double T0, double Tf, double P,double Rg
     double c01000=0.3033992490e+01, c11000=0.2176918040e-02,c21000=-0.1640725180e-06,c31000=-0.9704198700e-10,c41000=0.1682009920e-13; //cp de 1000 a 5000K
     double m0=-0.1286013492e+02, m1=-0.1377850379e+01, m2=0.4213981638e+00,m3=-0.2414423056e-01; //Lambda i mu valen el mateix de 200 a 5000K
     double l0=0.1185254026e+02 ,l1=-0.8965822807e+01,l2= 0.1528828068e+01,l3= -0.7590175979e-01;
-    double terme1=c0*T0+c1*pow(T0,2)/2+c2*pow(T0,3)/3+c3*pow(T0,4)/4+c4*pow(T0,5)/5;
-    double terme2=c0*Tf+c1*pow(Tf,2)/2+c2*pow(Tf,3)/3+c3*pow(Tf,4)/4+c4*pow(Tf,5)/5;
-    cp=(terme2-terme1)/(Tf-T0);
+    
     if (T0==Tf and T0<1000){
         cp=c0+c1*T0+c2*pow(T0,2)+c3*pow(T0,3)+c4*pow(T0,4);
     }
@@ -130,6 +128,7 @@ void fluid::Propietats_termofisiquesH2O(double T0, double Tf, double P,double Rg
         double terme2=c01000*Tf+c11000*pow(Tf,2)/2+c21000*pow(Tf,3)/3+c31000*pow(Tf,4)/4+c41000*pow(Tf,5)/5;
         cp=(terme2-terme1)/(Tf-T0);
     } 
+    cp=cp*R_universal;
     double T=(T0+Tf)/2;
     densitat=P/(Rgas*T);
     viscositat= exp(m0+m1*log(T)+m2*pow(log(T),2)+m3*pow(log(T),3));
@@ -155,6 +154,32 @@ void fluid::Calcul_coeficients_exterior(double cp, double lambda, double mu, dou
     }
     Alfa_i=lambda*Nusselt/X;
     
+}
+void fluid::Propietats_termofisiquescambra(double T, double P,double Rgas,double v_H2O,double v_H2exces, double v_O2exces){
+    double c0H2O=0.4198640560e+01 ,c1H2O=-0.2036434100e-02,c2H2O= 0.6520402110e-05 ,c3H2O=-0.5487970620e-08,c4H2O= 0.1771978170e-11;
+    double c01000H2O=0.3033992490e+01, c11000H2O=0.2176918040e-02,c21000H2O=-0.1640725180e-06,c31000H2O=-0.9704198700e-10,c41000H2O=0.1682009920e-13; //cp de 1000 a 5000K
+    double c0H2=0.2344331120e+01, c1H2=0.7980520750e-02, c2H2=-0.1947815100e-04, c3H2=0.2015720940e-07, c4H2=-0.7376117610e-11;  
+    double c01000H2=0.3337279200e+01,c11000H2=-0.4940247310e-04, c21000H2=0.4994567780e-06, c31000H2= -0.1795663940e-09, c41000H2=0.2002553760e-13;
+    double c0O2=0.3782456360e+01, c1O2=-0.2996734160e-02,c2O2=0.9847302010e-05,c3O2=-0.9681295090e-08,c4O2=0.3243728370e-11;
+    double c01000O2=0.3282537840e+01,c11000O2= 0.1483087540e-02,c21000O2=-0.7579666690e-06,c31000O2= 0.2094705550e-09, c41000O2=-0.2167177940e-13;
+    double m0=-0.1286013492e+02, m1=-0.1377850379e+01, m2=0.4213981638e+00,m3=-0.2414423056e-01; //Lambda i mu de la mescla assumirem que son les de l'aigua
+    double l0=0.1185254026e+02 ,l1=-0.8965822807e+01,l2= 0.1528828068e+01,l3= -0.7590175979e-01; 
+    double cpH2,cpH2O, cpO2;
+    if(T<1000){
+        cpH2=c0H2+c1H2*T+c2H2*pow(T,2)+c3H2*pow(T,3)+c4H2*pow(T,4);
+        cpO2=c0O2+c1O2*T+c2O2*pow(T,2)+c3O2*pow(T,3)+c4O2*pow(T,4);
+        cpH2O=c0H2O+c1H2O*T+c2H2O*pow(T,2)+c3H2O*pow(T,3)+c4H2O*pow(T,4);
+    }
+    else{
+        cpH2=c01000H2+c11000H2*T+c21000H2*pow(T,2)+c31000H2*pow(T,3)+c41000H2*pow(T,4);
+        cpO2=c01000O2+c11000O2*T+c21000O2*pow(T,2)+c31000O2*pow(T,3)+c41000O2*pow(T,4);
+        cpH2O=c01000H2O+c11000H2O*T+c21000H2O*pow(T,2)+c31000H2O*pow(T,3)+c41000H2O*pow(T,4);
+    }
+    cp=v_H2O*cpH2O+v_H2exces*cpH2+v_O2exces*cpO2;//Calculem la cp total com la contribució de cada especie
+    cp=cp*Rgas;
+    densitat=P/(Rgas*T);
+    viscositat= exp(m0+m1*log(T)+m2*pow(log(T),2)+m3*pow(log(T),3));
+    conductivitat=exp(l0+l1*log(T)+l2*pow(log(T),2)+l3*pow(log(T),3));
 }
 
 double condMolibde(double T){
