@@ -12,7 +12,7 @@ using namespace std;
 auto start = chrono::high_resolution_clock::now();
 
 
-const int n = 2000; //Volums de control del fluid, n+1 nodes
+const int n =1000; //Volums de control del fluid, n+1 nodes
 const double delta = 1e-10;
 const double pi = 2 * acos(0.0);
 const double Runiversal=8.3144621;
@@ -23,10 +23,10 @@ int main(){
     std::cout.precision(15);
     std::scientific;
     double L=0.5, D1=0.2, D2=0.203, D3=0.25, D4=0.253;
-    double pcambra=100e+5, cabalin1H2=41.2, cabalin1O2=208.8, TinH2=200, TinO2=200; //La temperatura d'entrada no és la temperatura real, però si és inferior a 200K, el rang de cp ja no és vàlid
+    double pcambra=100e+5, cabalin1H2=41.2, cabalin1O2=193.8, TinH2=200, TinO2=200; //La temperatura d'entrada no és la temperatura real, però si és inferior a 200K, el rang de cp ja no és vàlid
     double rhocambra=70.85;//Kg/m3 //Primer assumirem la del hidrogen líquid, després la modificarem amb la dels gasos després de la combustió i necessitarem calcular Tcc
     
-    double Tin3=400, cabalin3=0.005, pin3=150e+5, Text=300, Pext=101325;
+    double Tin3=200, cabalin3=0.05, pin3=150e+5, Text=300, Pext=101325;
     double Tcomb=1000, Ttub2_inic=800, Ttub4_inic=500;
     double rugositat2in=0.0002, rugositat2ext=0.0003, rugositat4in=0.0004, rugositat4ext=0.0002;
     double Q_cambra=0, Tcc_inici=2500;
@@ -145,6 +145,11 @@ int main(){
         Q_tub2=alfa1*Sl2int*(Tcomb-T2[i])-alfa3[i]*Sl2out*(-(T3[i]+T3[i+1])/2+T2[i])+Q_tub2;
         Q_tub4=alfa3[i]*Sl4in*((T3[i]+T3[i+1])/2-T4[i])-alfa5[i]*Sl4out*(-Text+T4[i])+Q_tub4;
     }
+    double Q_34=0;
+    for (int i = 0; i < n; i++)
+    {    
+        Q_34=alfa3[i]*Sl4in*((T3[i]+T3[i+1])/2-T4[i])+Q_34;
+    }
     std::cout<<"Tub 2: "<<Q_tub2<<", Tub 4: "<<Q_tub4<<endl;
     //Conservacio massa tub
     double cons_massa3=rho3[0]*v3[0]-rho3[n]*v3[n];
@@ -156,17 +161,33 @@ int main(){
         mom_T=p3[i]*S3-p3[i+1]*S3-0.5*f3[i]*(Sl2out+Sl4in)*(rho3[i]+rho3[i+1])/2*pow((v3[i]+v3[i+1])/2,2)-cabalin3*(v3[i+1]-v3[i])+mom_T;
     }
     cout<<"Moment: "<<mom_T<<endl;
+    //Momentum tub 3 balanç global
+    double fregament_tot=0;
+    for (int i = 0; i < n; i++)
+    {
+        fregament_tot=0.5*f3[i]*(Sl2out+Sl4in)*(rho3[i]+rho3[i+1])/2*pow((v3[i]+v3[i+1])/2,2);
+    }
+    double mom_2=p3[0]*S3-p3[n]*S3-fregament_tot-cabalin3*(v3[n]-v3[0]);
+    //Energia tub 3
+    double energiatot=0;
+    for (int i = 0; i < n; i++)
+    {   
+        H2ext.Propietats_termofisiquesH2(T3[i],T3[i+1],p3[i],Rhidrogen);     
+        H2ext.cp=H2ext.cp/massa_molarH2;
+        energiatot=alfa3[i]*Sl2out*(-(T3[i]+T3[i+1])/2+T2[i])-alfa3[i]*Sl4in*((T3[i]+T3[i+1])/2-T4[i])-cabalin3*H2ext.cp*(T3[i+1]-T3[i])-cabalin3*(pow(v3[i+1],2)-pow(v3[i],2))/2+energiatot;
+    }
+    cout<<"Energia intercanviada en el tub:"<<energiatot<<endl;
     auto stop = chrono::high_resolution_clock::now();
     auto duration = chrono::duration_cast<chrono::microseconds>(stop - start);
     std::cout<<"Temps execucio (s)" <<static_cast<float>(duration.count())/1000000 << endl; 
     
-    
+
     ofstream fout;
-    fout.open("Treball_sortida.csv");
-    fout<<"i"<<","<<"x1[i]"<<","<<"T1[i]"<<","<<"P1[i]"<<","<<"v1[i]"<<","<<"rho1[i]"<<","<<"alfa1[i]"<<","<<"T3[i]"<<","<<"P3[i]"<<","<<"v3[i]"<<","<<"rho3[i]"<<","<<"alfa3[i]"<<","<<"T2[i]"<<","<<"T4[i]"<<endl; //alfa, T2,T4[n-1]=0 perque no hi ha nodes
+    fout.open("../Sortida/Treball_sortida.csv");
+    fout<<"i"<<","<<"x1[i]"<<","<<"Tcc"<<","<<"Calor cambra"<<","<<"Calor extreta pel fluid"<<","<<"Calor intercanviada amb l'aire exterior"<<","<<"T3[i]"<<","<<"P3[i]"<<","<<"v3[i]"<<","<<"rho3[i]"<<","<<"alfa3[i]"<<","<<"T2[i]"<<","<<"T4[i]"<<endl; //alfa, T2,T4[n-1]=0 perque no hi ha nodes
     for (int i = 0; i < n+1; i++)
     {   
-        //fout<<setprecision(15)<<i<<","<<x1[i]<<","<<T1[i]<<","<<p1[i]<<","<<v1[i]<<","<<rho1[i]<<","<<alfa1[i]<<","<<T3[i]<<","<<p3[i]<<","<<v3[i]<<","<<rho3[i]<<","<<alfa3[i]<<","<<T2[i]<<","<<T4[i]<<endl;
+        fout<<setprecision(15)<<i<<","<<x1[i]<<","<<Tcomb<<","<<Q_cambra<<","<<abs(Q_34-Q_cambra)<<","<<Q_34<<","<<T3[i]<<","<<p3[i]<<","<<v3[i]<<","<<rho3[i]<<","<<alfa3[i]<<","<<T2[i]<<","<<T4[i]<<endl;
         
         
     }
