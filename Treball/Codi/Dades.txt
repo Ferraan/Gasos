@@ -1,0 +1,26 @@
+Error total:
+delta = 1e-10;
+Constants físiques:
+pi = 2 * acos(0.0);
+Runiversal=8.3144621, Raire=287;
+massa_molarH2=0.2015939951e-2, massa_molarO2=0.3199880028e-1, massa_molarH2O=0.1801534009e-1;//Kg/mol
+g=9.81;
+
+Geometria
+L=0.5, D1=0.2, D2=0.203, D3=0.25, D4=0.253;
+
+Cambra combustió:
+pcc=100e+5, cabalin1H2=41.2, cabalin1O2=193.8, TinH2=200, TinO2=200; //La temperatura d'entrada no és la temperatura real, però si és inferior a 200K, el rang de cp ja no és vàlid
+rhocambra=70.85;//Kg/m3 //Primer assumirem la del hidrogen líquid, després la modificarem amb la dels gasos després de la combustió i necessitarem calcular Tcc
+
+Tub 3:
+Tin3=200, cabalin3=0.05, pin3=150e+5, Text=300, Pext=101325;
+
+Rugositats:
+rugositat2ext=0.0003, rugositat4in=0.0004;
+
+Material tub 2:
+Coure
+
+Material tub 4:
+Coure

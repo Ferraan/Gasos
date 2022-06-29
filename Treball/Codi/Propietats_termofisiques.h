@@ -14,3 +14,4 @@ class fluid
     void Propietats_termofisiquescambra(double T0, double P,double Rgas,double v_H2O,double v_H2exces, double v_O2exces);
 };
 double condMolibde(double T);
+double condCoure(double T);

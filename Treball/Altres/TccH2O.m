@@ -88,7 +88,7 @@ O2in=vO2*cp(T0,TAin,a0o2,a1o2,a2o2,a3o2,a4o2,b0o2,b1o2,b2o2,b3o2,b4o2)*(TAin-T0)
 H2Oout=vH2O*cp(298,Tcc,a0h2o,a1h2o,a2h2o,a3h2o,a4h2o,b0h2o,b1h2o,b2h2o,b3h2o,b4h2o)*(Tcc-T0)
 while (error>10^-10)
     Tccold=Tcc;
-    Tcc=T0+(terme1+terme2)/(+vH2O*cp(T0,Tcc,a0h2o,a1h2o,a2h2o,a3h2o,a4h2o,b0h2o,b1h2o,b2h2o,b3h2o,b4h2o));
+    Tcc=T0+(terme1)/(+vH2O*cp(T0,Tcc,a0h2o,a1h2o,a2h2o,a3h2o,a4h2o,b0h2o,b1h2o,b2h2o,b3h2o,b4h2o));
     Tcc=Tccold+0.3*(Tcc-Tccold);
     error=abs(Tcc-Tccold);
 end
@@ -100,3 +100,4 @@ end
 % O2in=vO2*cp(T0,TAin,a0o2,a1o2,a2o2,a3o2,a4o2,b0o2,b1o2,b2o2,b3o2,b4o2)*(TAin-T0)
 % n2in=v_N2*cp(T0,TAin,a0n2,a1n2,a2n2,a3n2,a4n2,b0n2,b1n2,b2n2,b3n2,b4n2)*(TAin-T0)
 % sum=-terme1-ch4in-O2in-n2in+n2out+Co2out+H2Oout
+H2Oout=vH2O*cp(298,Tcc,a0h2o,a1h2o,a2h2o,a3h2o,a4h2o,b0h2o,b1h2o,b2h2o,b3h2o,b4h2o)*(Tcc-T0)

@@ -12,10 +12,10 @@ using namespace std;
 auto start = chrono::high_resolution_clock::now();
 
 
-const int n =400; //Volums de control del fluid, n+1 nodes
+const int n =16; //Volums de control del fluid, n+1 nodes
 const double delta = 1e-10;
 const double pi = 2 * acos(0.0);
-const double Runiversal=8.3144621;
+const double Runiversal=8.3144621, Raire=287;
 const double massa_molarH2=0.2015939951e-2, massa_molarO2=0.3199880028e-1, massa_molarH2O=0.1801534009e-1;//Kg/mol
 const double g=9.81;
 
@@ -28,12 +28,12 @@ int main(){
     
     double Tin3=200, cabalin3=0.05, pin3=150e+5, Text=300, Pext=101325;
     double Tcomb=1000, Ttub2_inic=800, Ttub4_inic=500;
-    double rugositat2ext=0.0003, rugositat4in=0.0004, rugositat4ext=0.0002;
+    double rugositat2ext=0.0003, rugositat4in=0.0004;
     double Q_cambra=0, Tcc_inici=2500;
     //Calculs previs
     double Deltax=L/n, Dh=D3-D2;
     double S1=pi*D1*D1/4, S3=pi*pow(D3-D2,2)/4, Sl2int=pi*D1*Deltax, Sl2out=pi*D2*Deltax, Sl4in=pi*D3*Deltax, Sl4out=pi*D4*Deltax, Sx2=pi*(pow(D2/2,2)-pow(D1/2,2)),  Sx4=pi*(pow(D4/2,2)-pow(D3/2,2));
-    double Rhidrogen=Runiversal/massa_molarH2, Roxigen=Runiversal/massa_molarO2, Raire=287;
+    double Rhidrogen=Runiversal/massa_molarH2, Roxigen=Runiversal/massa_molarO2;
     double rhoin3=pin3/(Tin3*Rhidrogen);
     double vin3=cabalin3/(S3*rhoin3);
     double v_cambra=cabalin1H2/(S1*rhocambra); //No sabem la velocitat dels gasos després de la combustió. Assumirem que és la mateixa a la que entra el fluid.
@@ -97,36 +97,36 @@ int main(){
         std::vector<double> T2old(n),T4old(n), D1f(n);
         T2old=T2;
         T4old=T4;
-        aE[0]=Deltax/(Deltax/(2*condMolibde(T2[0]))+Deltax/(2*condMolibde(T2[1])))*Sx2/Deltax;
+        aE[0]=Deltax/(Deltax/(2*condCoure(T2[0]))+Deltax/(2*condCoure(T2[1])))*Sx2/Deltax;
         aW[0]=0; //AD1abatic
         bP[0]=Tcomb*alfa1*Sl2int+alfa3[0]*(T3[0]+T3[1])/2*Sl2out;
         aP[0]=aW[0]+aE[0]+alfa1*Sl2int+alfa3[0]*Sl2out;
         for (int i = 1; i < n-1; i++)
         {
-            aE[i]=Deltax/(Deltax/(2*condMolibde(T2[i]))+Deltax/(2*condMolibde(T2[i+1])))*Sx2/Deltax;
-            aW[i]=Deltax/(Deltax/(2*condMolibde(T2[i]))+Deltax/(2*condMolibde(T2[i-1])))*Sx2/Deltax; 
+            aE[i]=Deltax/(Deltax/(2*condCoure(T2[i]))+Deltax/(2*condCoure(T2[i+1])))*Sx2/Deltax;
+            aW[i]=Deltax/(Deltax/(2*condCoure(T2[i]))+Deltax/(2*condCoure(T2[i-1])))*Sx2/Deltax; 
             bP[i]=Tcomb*alfa1*Sl2int+alfa3[i]*(T3[i]+T3[i+1])/2*Sl2out;
             aP[i]=aW[i]+aE[i]+alfa1*Sl2int+alfa3[i]*Sl2out;
         }
         aE[n-1]=0;//AD1abatic
-        aW[n-1]=Deltax/(Deltax/(2*condMolibde(T2[n-2]))+Deltax/(2*condMolibde(T2[n-1])))*Sx2/Deltax;
+        aW[n-1]=Deltax/(Deltax/(2*condCoure(T2[n-2]))+Deltax/(2*condCoure(T2[n-1])))*Sx2/Deltax;
         bP[n-1]=Tcomb*alfa1*Sl2int+alfa3[n-1]*(T3[n-1]+T3[n])/2*Sl2out;
         aP[n-1]=aW[n-1]+aE[n-1]+alfa1*Sl2int+alfa3[n-1]*Sl2out;
         solverTDMA(T2,aP,aW,aE,bP,n);
         //Tub 4
-        aE[0]=Deltax/(Deltax/(2*condMolibde(T4[0]))+Deltax/(2*condMolibde(T4[1])))*Sx4/Deltax;
+        aE[0]=Deltax/(Deltax/(2*condCoure(T4[0]))+Deltax/(2*condCoure(T4[1])))*Sx4/Deltax;
         aW[0]=0; //AD1abatic
         bP[0]=(T3[0]+T3[1])/2*alfa3[0]*Sl4in+alfa5[0]*Text*Sl4out;
         aP[0]=aW[0]+aE[0]+alfa3[0]*Sl4in+alfa5[0]*Sl4out;
         for (int i = 1; i < n-1; i++)
         {
-            aE[i]=Deltax/(Deltax/(2*condMolibde(T4[i]))+Deltax/(2*condMolibde(T4[i+1])))*Sx4/Deltax;
-            aW[i]=Deltax/(Deltax/(2*condMolibde(T4[i]))+Deltax/(2*condMolibde(T4[i-1])))*Sx4/Deltax; 
+            aE[i]=Deltax/(Deltax/(2*condCoure(T4[i]))+Deltax/(2*condCoure(T4[i+1])))*Sx4/Deltax;
+            aW[i]=Deltax/(Deltax/(2*condCoure(T4[i]))+Deltax/(2*condCoure(T4[i-1])))*Sx4/Deltax; 
             bP[i]=(T3[i]+T3[i+1])/2*alfa3[i]*Sl4in+alfa5[i]*Text*Sl4out;
             aP[i]=aW[i]+aE[i]+alfa3[i]*Sl4in+alfa5[i]*Sl4out;
         }
         aE[n-1]=0;//AD1abatic
-        aW[n-1]=Deltax/(Deltax/(2*condMolibde(T4[n-2]))+Deltax/(2*condMolibde(T4[n-1])))*Sx4/Deltax;
+        aW[n-1]=Deltax/(Deltax/(2*condCoure(T4[n-2]))+Deltax/(2*condCoure(T4[n-1])))*Sx4/Deltax;
         bP[n-1]=(T3[n-1]+T3[n])/2*alfa3[n-1]*Sl4in+alfa5[n-1]*Text*Sl4out;
         aP[n-1]=aW[n-1]+aE[n-1]+alfa3[n-1]*Sl4in+alfa5[n-1]*Sl4out;
         solverTDMA(T4,aP,aW,aE,bP,n);

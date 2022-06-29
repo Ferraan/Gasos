@@ -185,3 +185,7 @@ void fluid::Propietats_termofisiquescambra(double T, double P,double Rgas,double
 double condMolibde(double T){
     return(-5.58681e-8*pow(T,3)+1.57652e-4*pow(T,2)-1.56785e-1*T+1.58929e+2);
 }
+
+double condCoure(double T){
+    return(-3.11e+1*log(T)+5.65e+2);
+}
