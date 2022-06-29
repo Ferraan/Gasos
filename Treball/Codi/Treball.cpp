@@ -12,7 +12,7 @@ using namespace std;
 auto start = chrono::high_resolution_clock::now();
 
 
-const int n =50; //Volums de control del fluid, n+1 nodes
+const int n =400; //Volums de control del fluid, n+1 nodes
 const double delta = 1e-10;
 const double pi = 2 * acos(0.0);
 const double Runiversal=8.3144621;
