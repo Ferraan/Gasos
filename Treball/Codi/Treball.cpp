@@ -12,8 +12,8 @@ using namespace std;
 auto start = chrono::high_resolution_clock::now();
 
 
-const int n =16; //Volums de control del fluid, n+1 nodes
-const double delta = 1e-10;
+const int n =2048; //Volums de control del fluid, n+1 nodes
+const double delta = 1e-9;
 const double pi = 2 * acos(0.0);
 const double Runiversal=8.3144621, Raire=287;
 const double massa_molarH2=0.2015939951e-2, massa_molarO2=0.3199880028e-1, massa_molarH2O=0.1801534009e-1;//Kg/mol
@@ -22,7 +22,7 @@ const double g=9.81;
 int main(){
     std::cout.precision(15);
     std::scientific;
-    double L=0.5, D1=0.2, D2=0.203, D3=0.25, D4=0.253;
+    double L=1, D1=0.5, D2=0.406, D3=0.5, D4=0.506;
     double pcc=100e+5, cabalin1H2=41.2, cabalin1O2=193.8, TinH2=200, TinO2=200; //La temperatura d'entrada no és la temperatura real, però si és inferior a 200K, el rang de cp ja no és vàlid
     double rhocambra=70.85;//Kg/m3 //Primer assumirem la del hidrogen líquid, després la modificarem amb la dels gasos després de la combustió i necessitarem calcular Tcc
     
@@ -84,6 +84,7 @@ int main(){
                 error=max(abs(vold-v3[i]),error);
                 error=max(abs(rho3[i]-rhoold),error);
             }
+            
             //Zona exterior
             double Tm=(T4[i]+Text)/2;
             aire.Propietats_termofisiquesaire(Tm,Pext,Raire);
@@ -182,18 +183,18 @@ int main(){
     H2ext.Propietats_termofisiquesH2(T3[0],T3[n],p3[0]+p3[n]/2,Rhidrogen);
     H2ext.cp=H2ext.cp/massa_molarH2;
     double Energia=Q_cambra-Q_34-cabalin3*H2ext.cp*(T3[n]-T3[0])-cabalin3*((pow(v3[n],2)-pow(v3[0],2))/2);
-    cout<<"Consercacio de l'energia: "<<Energia<<endl;
+    cout<<"Conservacio de l'energia: "<<Energia<<endl;
     auto stop = chrono::high_resolution_clock::now();
     auto duration = chrono::duration_cast<chrono::microseconds>(stop - start);
     std::cout<<"Temps execucio (s)" <<static_cast<float>(duration.count())/1000000 << endl; 
     
 
     ofstream fout;
-    fout.open("../Sortida/Treball_sortida.csv");
-    fout<<"i"<<","<<"x1[i]"<<","<<"Tcc"<<","<<"Calor cambra"<<","<<"Calor extreta pel fluid"<<","<<"Calor intercanviada amb l'aire exterior"<<","<<"T3[i]"<<","<<"P3[i]"<<","<<"v3[i]"<<","<<"rho3[i]"<<","<<"alfa3[i]"<<","<<"T2[i]"<<","<<"T4[i]"<<endl; //alfa, T2,T4[n-1]=0 perque no hi ha nodes
+    fout.open("../Sortida/Treball_sortida_n=2048_delta-10_geometria.csv");
+    fout<<"i"<<","<<"x1[i]"<<","<<"Tcc"<<","<<"Calor cambra"<<","<<"Calor extreta pel fluid"<<","<<"Calor intercanviada amb l'aire exterior"<<","<<"T3[i]"<<","<<"P3[i]"<<","<<"v3[i]"<<","<<"rho3[i]"<<","<<"alfa3[i]"<<","<<"T2[i]"<<","<<"T4[i]"<<","<<"Temps execucio (s)"<<endl; //alfa, T2,T4[n-1]=0 perque no hi ha nodes
     for (int i = 0; i < n+1; i++)
     {   
-        fout<<setprecision(15)<<i<<","<<x1[i]<<","<<Tcomb<<","<<Q_cambra<<","<<abs(Q_34-Q_cambra)<<","<<Q_34<<","<<T3[i]<<","<<p3[i]<<","<<v3[i]<<","<<rho3[i]<<","<<alfa3[i]<<","<<T2[i]<<","<<T4[i]<<endl;
+        fout<<setprecision(15)<<i<<","<<x1[i]<<","<<Tcomb<<","<<Q_cambra<<","<<abs(Q_34-Q_cambra)<<","<<Q_34<<","<<T3[i]<<","<<p3[i]<<","<<v3[i]<<","<<rho3[i]<<","<<alfa3[i]<<","<<T2[i]<<","<<T4[i]<<","<<static_cast<float>(duration.count())/1000000<<endl;
         
     }
     
