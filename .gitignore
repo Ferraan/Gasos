@@ -27,3 +27,12 @@ TDMA/Resultats.csv
 *.pdb
 *.out
 Tables_of_Thermal_Properties_of_Gases.pdf
+Treball/Treball_Ferran_de_Miguel.zip
+Treball/Treball_Ferran_de_Miguel/Combustio.cpp
+Treball/Treball_Ferran_de_Miguel/Combustio.h
+Treball/Treball_Ferran_de_Miguel/Propietats_termofisiques.cpp
+Treball/Treball_Ferran_de_Miguel/Propietats_termofisiques.h
+Treball/Treball_Ferran_de_Miguel/solvers.h
+Treball/Treball_Ferran_de_Miguel/TDMA_solver.cpp
+Treball/Treball_Ferran_de_Miguel/Treball_Gasos_Ferran_de_Miguel.pdf
+Treball/Treball_Ferran_de_Miguel/Treball.cpp
